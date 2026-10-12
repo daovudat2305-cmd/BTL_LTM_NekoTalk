@@ -1,0 +1,25 @@
+# Environments & Secrets (Bảo vệ thông tin bảo mật)
+**/.env
+**/.env*.local
+**/.env.production
+
+# Server (Spring Boot / Maven)
+source/server/target/
+source/server/bin/
+source/server/.mvn/wrapper/maven-wrapper.jar
+source/server/.vscode/
+
+# Client (Next.js / Node)
+source/client/node_modules/
+source/client/.next/
+source/client/out/
+source/client/tsconfig.tsbuildinfo
+source/client/.vscode/
+
+# OS & Editors
+.vscode/
+.idea/
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini

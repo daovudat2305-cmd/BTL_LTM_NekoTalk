@@ -1,0 +1,18 @@
+# === SERVER (Java / Maven) ===
+server/target/
+server/bin/
+server/.env
+server/.vscode/
+
+# === CLIENT (Next.js / Node.js) ===
+client/node_modules/
+client/.next/
+client/.env
+client/.env.local
+client/tsconfig.tsbuildinfo
+client/.vscode/
+
+# === Hệ điều hành ===
+.DS_Store
+Thumbs.db
+desktop.ini
