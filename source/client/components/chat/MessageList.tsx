@@ -1,0 +1,73 @@
+"use client";
+
+import { useChatStore } from "@/store/useChatStore";
+import { useUserStore } from "@/store/useUserStore";
+import { useEffect, useRef } from "react";
+
+export default function MessageList({ chatId }: { chatId: string }) {
+  const { fetchMessages, messages, loadingMessages } = useChatStore();
+  const currentUser = useUserStore((s) => s.user);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  const chatMessages = messages[chatId] || [];
+
+  //tải tin nhắn khi mở phòng chat
+  useEffect(() => {
+    if (chatId) {
+      fetchMessages(chatId);
+    }
+  }, [chatId, fetchMessages]);
+
+  //cuộn xuống khi có tin nhắn mới
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
+
+  if (loadingMessages && chatMessages.length === 0) {
+    return (
+      <div className="flex-1 p-4 flex justify-center items-center text-gray-500">
+        Đang tải tin nhắn...
+      </div>
+    );
+  }
+
+  console.log("[MessageList] chatId đang xem:", chatId);
+  console.log("[MessageList] số tin nhắn trong cache:", chatMessages.length);
+  console.log(
+    "[MessageList] tất cả keys trong messages store:",
+    Object.keys(messages),
+  );
+
+  return (
+    <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-white">
+      {chatMessages.length === 0 ? (
+        <div className="text-center text-gray-400 mt-10">
+          Bắt đầu trò chuyện!
+        </div>
+      ) : (
+        chatMessages.map((msg) => {
+          const isMe = msg.senderId === currentUser?.userId;
+          return (
+            <div
+              key={msg.id || msg.tempId}
+              className={`flex gap-2 max-w-[70%] ${isMe ? "self-end" : "self-start"}`}
+            >
+              {!isMe && (
+                <div className="w-8 h-8 rounded-full bg-pink-100 flex-shrink-0 flex items-center justify-center text-xs font-bold text-pink-500">
+                  {msg.senderName?.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div
+                className={`rounded-2xl p-3 text-[15px] ${isMe ? "bg-gradient-to-r from-rose-500 to-pink-500 text-white" : "bg-gray-100 text-black"}`}
+              >
+                {msg.content}
+              </div>
+            </div>
+          );
+        })
+      )}
+      {/* Element ẩn để cuộn xuống */}
+      <div ref={bottomRef} />
+    </div>
+  );
+}
