@@ -7,10 +7,10 @@
 ## 🎯 MỤC TIÊU
 
 Client chịu trách nhiệm:
-- Hiển thị giao diện chat realtime
-- Xác thực người dùng (đăng nhập / đăng ký)
-- Gửi và nhận tin nhắn qua WebSocket/STOMP
-- Quản lý trạng thái ứng dụng
+- Hiển thị giao diện chat realtime (responsive, dark/light theme)
+- Xác thực người dùng (đăng nhập / đăng ký / refresh token tự động)
+- Gửi và nhận tin nhắn tức thì qua WebSocket/STOMP
+- Quản lý trạng thái ứng dụng bằng Zustand
 
 ---
 
@@ -18,52 +18,71 @@ Client chịu trách nhiệm:
 
 | Thành phần | Công nghệ | Ghi chú |
 |------------|-----------|---------|
-| Ngôn ngữ   | TypeScript | |
+| Ngôn ngữ   | TypeScript | Type safety |
 | Framework  | Next.js 16.3 | App Router |
-| UI         | Tailwind CSS v4 + shadcn/ui | |
-| State      | Zustand | |
-| HTTP       | Axios | Giao tiếp với REST API |
-| Real-time  | @stomp/stompjs | WebSocket chat |
-| Form       | React Hook Form + Zod | Validation |
+| UI         | Tailwind CSS v4 + shadcn/ui | Modern UI |
+| State      | Zustand | Quản lý state người dùng & chat |
+| HTTP       | Axios | Interceptors quản lý JWT & refresh token |
+| Real-time  | @stomp/stompjs | WebSocket kết nối backend |
+| Form       | React Hook Form + Zod | Validate dữ liệu nhập |
+| Container  | Docker (Multi-stage build) | Node 20 Alpine |
 
 ---
 
 ## 🚀 HƯỚNG DẪN CHẠY
 
-### Yêu cầu
-- Node.js 20+
-- Backend server đang chạy tại `http://localhost:8080/api`
+### Cách 1: Chạy bằng Docker (Khuyên dùng)
+Nếu chạy toàn bộ dự án từ root repo:
+```bash
+docker compose up -d --build
+```
+Hoặc chỉ build và chạy riêng module Client:
+```bash
+docker build -t nekotalk-client .
+docker run -p 3000:3000 --name nekotalk-client nekotalk-client
+```
 
-### 1. Cài đặt dependencies
+---
+
+### Cách 2: Chạy cục bộ (Local Development)
+
+#### Yêu cầu
+- Node.js 20+
+- Backend server đang chạy tại `http://localhost:8080`
+
+#### 1. Cài đặt dependencies
 ```bash
 cd source/client
 npm install
 ```
 
-### 2. Cấu hình môi trường
-Tạo file `.env.local` (hoặc chỉnh `.env`):
+#### 2. Cấu hình môi trường
+Tạo file `.env.local` (hoặc sao chép từ `.env.example`):
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8080/api
+NEXT_PUBLIC_API_URL=http://localhost:8080
 NEXT_PUBLIC_WS_URL=ws://localhost:8080/ws
 ```
 
-### 3. Chạy development server
+#### 3. Chạy development server
 ```bash
 npm run dev
 ```
 
-Client chạy tại: `http://localhost:3000`
+Mở trình duyệt tại: [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## 📦 CẤU TRÚC
+## 📦 CẤU TRÚC THƯ MỤC
 
 ```
 client/
+├── Dockerfile              ← Multi-stage build cho Docker
+├── .dockerignore
+├── .env.example            ← Mẫu biến môi trường
 ├── package.json
 ├── next.config.ts
 ├── app/                    ← Next.js App Router pages
-│   ├── (auth)/             ← Trang đăng nhập / đăng ký
+│   ├── (auth)/             ← Trang đăng nhập (/login) & đăng ký (/register)
 │   ├── chat/               ← Trang chat chính
 │   ├── layout.tsx
 │   └── globals.css
@@ -71,10 +90,10 @@ client/
 │   ├── auth/
 │   ├── chat/
 │   └── ui/                 ← shadcn/ui components
-├── hooks/                  ← Custom React hooks
-├── services/               ← Axios API calls
-├── store/                  ← Zustand state stores
-├── types/                  ← TypeScript types/interfaces
+├── hooks/                  ← Custom React hooks (useWebSocket, ...)
+├── services/               ← Axios API calls (auth, user, conversation, message)
+├── store/                  ← Zustand stores (userStore, chatStore, ...)
+├── types/                  ← TypeScript types & interfaces
 ├── lib/                    ← Utility functions
 └── public/                 ← Static assets
 ```
@@ -83,6 +102,6 @@ client/
 
 ## 📝 GHI CHÚ
 
-- Đảm bảo **server backend đã chạy** trước khi khởi động client
-- Mặc định kết nối đến `localhost:8080` (backend) và `localhost:3000` (frontend)
-- File `.env.local` **không commit lên Git**
+- Đảm bảo **server backend đã chạy** trước khi gửi tin nhắn hoặc gọi API
+- `NEXT_PUBLIC_API_URL` trỏ tới `http://localhost:8080` (không kèm `/api` vì các services đã tự tiền tố `/api/...`)
+- File `.env.local` không commit lên Git

@@ -1,0 +1,78 @@
+services:
+  # ==========================================
+  # Database MySQL
+  # ==========================================
+  mysql:
+    image: mysql:8.0
+    container_name: nekotalk-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: chat_online
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -padmin || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - nekotalk-network
+
+  # ==========================================
+  # Backend Server (Spring Boot)
+  # ==========================================
+  server:
+    build:
+      context: ./source/server
+      dockerfile: Dockerfile
+    container_name: nekotalk-server
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/chat_online?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: admin
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - nekotalk-network
+
+  # ==========================================
+  # Frontend Client (Next.js)
+  # ==========================================
+  client:
+    build:
+      context: ./source/client
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8080
+        NEXT_PUBLIC_WS_URL: ws://localhost:8080/ws
+    container_name: nekotalk-client
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
+    networks:
+      - nekotalk-network
+
+# ==========================================
+# Volumes & Networks
+# ==========================================
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  nekotalk-network:
+    driver: bridge
