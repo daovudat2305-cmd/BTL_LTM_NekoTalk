@@ -4,6 +4,11 @@
 
 > 📘 Ứng dụng chat realtime sử dụng WebSocket/STOMP, xây dựng với Spring Boot (backend), Next.js (frontend) và MySQL (database), hỗ trợ đóng gói và triển khai toàn diện bằng Docker Compose.
 
+> 📚 **Tài liệu mở rộng:**
+> - 📋 [Kế hoạch triển khai & Lộ trình nhóm (PLAN.md)](./PLAN.md) *(Tài liệu nội bộ nhóm theo dõi tiến độ)*
+> - 🎓 [Báo cáo chi tiết Công nghệ & Kiến thức LTM áp dụng (PROJECT_DETAILS.md)](./PROJECT_DETAILS.md) *(Tài liệu ôn tập & vấn đáp bảo vệ BTL)*
+
+
 ---
 
 ## 🧑‍💻 THÔNG TIN NHÓM
@@ -234,6 +239,7 @@ BTL_LTM_NekoTalk/
 ├── docker-compose.yml           # Cấu hình Docker Compose (MySQL, Server, Client)
 ├── statics/                     # Tài nguyên tĩnh, sơ đồ kiến trúc
 │   ├── logo.png
+│   ├── dataset_sample.csv
 │   └── diagram.png
 └── source/                      # Mã nguồn dự án
     ├── .gitignore
@@ -273,9 +279,9 @@ BTL_LTM_NekoTalk/
 ## 🧩 HƯỚNG PHÁT TRIỂN THÊM
 
 - [x] Containerize toàn bộ dự án bằng Docker Compose
-- [ ] Hỗ trợ gửi file, hình ảnh trong chat
-- [ ] Thêm tính năng quản lý nhóm chat (thêm/xóa thành viên, đổi tên nhóm)
-- [ ] Push notification trên trình duyệt khi có tin nhắn mới
+- [x] Tài liệu kiến trúc chuyên sâu & bộ câu hỏi vấn đáp ([PROJECT_DETAILS.md](./PROJECT_DETAILS.md))
+- [ ] Tính năng Typing indicator & Read receipts
+- [ ] Tính năng đàm thoại âm thanh & video call WebRTC P2P (Xem [PLAN.md](./PLAN.md))
 - [ ] Triển khai lên Cloud (AWS / DigitalOcean / Railway)
 
 ---
