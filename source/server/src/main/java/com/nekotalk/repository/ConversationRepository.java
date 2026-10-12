@@ -1,0 +1,65 @@
+package com.nekotalk.repository;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import com.nekotalk.entity.Conversation;
+
+@Repository
+public interface ConversationRepository extends JpaRepository<Conversation, String> {
+
+        // @EntityGraph: Eager load participants và user để tránh N+1 query problem
+        // attributePaths: Specify các relationships cần load cùng lúc
+        @EntityGraph(attributePaths = { "participants", "participants.user" })
+        Optional<Conversation> findByParticipantHash(String participantHash);
+
+        // Query tất cả conversations mà user tham gia
+        // DISTINCT: Tránh duplicate khi JOIN với participants (1 conversation có nhiều
+        // participants)
+        // ORDER BY: Sắp xếp theo lastMessageTime giảm dần, conversation có tin nhắn mới
+        // nhất lên đầu
+        // NULLS LAST: Conversation chưa có tin nhắn (lastMessageTime = null) xuống cuối
+        @Query("""
+                        SELECT DISTINCT c FROM Conversation c
+                        JOIN c.participants p
+                        WHERE p.user.id = :userId
+                        ORDER BY c.lastMessageTime DESC NULLS LAST
+                        """)
+        Page<Conversation> findAllByUserId(@Param("userId") String userId, Pageable pageable);
+
+        @Query("""
+                        SELECT DISTINCT c FROM Conversation c
+                        LEFT JOIN FETCH c.participants p
+                        LEFT JOIN FETCH p.user
+                        WHERE c.id IN :conversationIds
+                        """)
+        List<Conversation> findByIdInWithParticipants(@Param("conversationIds") List<String> conversationIds);
+
+        // validate user là member của conversation
+        // Query: SELECT c FROM Conversation c
+        // WHERE c.id = :conversationId
+        // AND EXISTS (SELECT p FROM c.participants p WHERE p.user.id = :userId)
+        @Query("""
+                        SELECT c FROM Conversation c
+                        WHERE c.id = :conversationId
+                        AND EXISTS (SELECT p FROM c.participants p WHERE p.user.id = :userId)
+                        """)
+        Optional<Conversation> findByIdAndMember(String conversationId, String userId);
+
+        @Query("""
+                SELECT cp.user.id
+                FROM ConversationParticipant cp
+                WHERE cp.conversation.id = :conversationId
+                AND cp.user.id != :senderId
+        """)
+        List<String> findParticipantIdsByConversationIdAndSenderId(@Param("conversationId") String conversationId, @Param("senderId") String senderId);
+
+}
