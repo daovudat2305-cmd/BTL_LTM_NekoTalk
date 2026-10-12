@@ -23,11 +23,11 @@
 
 Hệ thống **NekoTalk** là ứng dụng chat đa người dùng trong thời gian thực (realtime) với các tính năng: đăng ký/đăng nhập xác thực bằng JWT, tìm kiếm người dùng, tạo cuộc trò chuyện 1-1 hoặc nhóm, và trò chuyện tức thì thông qua giao thức WebSocket (STOMP).
 
-**Kiến trúc:**
+**Kiến trúc hệ thống:**
 - **Backend (Spring Boot):** Xử lý nghiệp vụ REST API, xác thực và cấp phát JWT, lưu trữ dữ liệu, broadcast tin nhắn qua WebSocket/STOMP Broker.
 - **Frontend (Next.js):** Giao diện web hiện đại (App Router, Tailwind CSS, shadcn/ui), quản lý trạng thái bằng Zustand, kết nối song song REST API (Axios) và WebSocket client (`@stomp/stompjs`).
 - **Database (MySQL 8):** Lưu trữ người dùng, cuộc hội thoại và lịch sử tin nhắn.
-- **Containerization (Docker Compose):** Đóng gói toàn bộ hệ sinh thái (Database, Backend, Frontend) thành các containers chạy độc lập và giao tiếp nội bộ.
+- **Containerization (Docker Compose):** Đóng gói toàn bộ hệ thống (Database, Backend, Frontend) thành các containers chạy độc lập và giao tiếp qua mạng nội bộ.
 
 **Cấu trúc giao tiếp:**
 ```
@@ -53,14 +53,55 @@ Hệ thống **NekoTalk** là ứng dụng chat đa người dùng trong thời 
 | **Client State** | Zustand | Quản lý state người dùng & tin nhắn |
 | **Real-time** | WebSocket + STOMP | `@stomp/stompjs` |
 | **HTTP Client** | Axios | Interceptor tự động refresh token |
-| **DevOps / Deploy** | Docker & Docker Compose | Multi-stage build (Alpine Linux) |
+| **Containerization** | Docker & Docker Compose | Multi-stage build (Alpine Linux) |
 
 ---
 
-## 🚀 HƯỚNG DẪN CHẠY DỰ ÁN
+## 🐳 TRIỂN KHAI VỚI DOCKER & DOCKER COMPOSE
 
-### Cách 1: Chạy toàn bộ với Docker Compose (Khuyên Dùng 🌟)
-> Chỉ cần cài đặt **[Docker Desktop](https://www.docker.com/products/docker-desktop/)**, bất kỳ ai clone repo về cũng có thể chạy ngay toàn bộ hệ thống (MySQL + Backend + Frontend) chỉ với **1 câu lệnh duy nhất**.
+Dự án đã được containerize hóa hoàn chỉnh theo đúng yêu cầu kỹ thuật của bài tập lớn. Người dùng hoặc giảng viên khi clone dự án về **không cần cài đặt Java 21, Node.js hay MySQL** trên máy thật, chỉ cần duy nhất **Docker Desktop**.
+
+### 1. Kiến trúc Container
+
+```
+                    [Host Machine / Browser]
+                     │                    │
+              Port 3000 (UI)        Port 8080 (API & WS)
+                     │                    │
+    ┌────────────────▼────────────────────▼─────────────────────┐
+    │  Docker Network: nekotalk-network                         │
+    │                                                           │
+    │  ┌─────────────────┐             ┌─────────────────────┐  │
+    │  │ nekotalk-client │             │   nekotalk-server   │  │
+    │  │ (Next.js 16)    │             │ (Spring Boot / JRE) │  │
+    │  └─────────────────┘             └──────────┬──────────┘  │
+    │                                             │             │
+    │                                             │ Port 3306   │
+    │                                             ▼             │
+    │                                  ┌─────────────────────┐  │
+    │                                  │    nekotalk-mysql   │  │
+    │                                  │       (MySQL 8)     │  │
+    │                                  └──────────┬──────────┘  │
+    └─────────────────────────────────────────────┼─────────────┘
+                                                  │
+                                       ┌──────────▼──────────┐
+                                       │ Volume: mysql_data  │
+                                       └─────────────────────┘
+```
+
+- **`nekotalk-mysql` (MySQL 8.0):**
+  - Tự động khởi tạo database `chat_online` với mã hóa UTF-8 (`utf8mb4`).
+  - Sử dụng cơ chế **Health Check** (`mysqladmin ping`) để đảm bảo DB đã sẵn sàng 100% trước khi backend kết nối.
+  - Dữ liệu được lưu trữ bền vững qua volume `mysql_data`.
+- **`nekotalk-server` (Spring Boot Java 21):**
+  - Đóng gói bằng **Multi-stage build**: Stage 1 biên dịch Maven, Stage 2 chạy với `eclipse-temurin:21-jre-alpine` giúp tối ưu dung lượng image.
+  - Phụ thuộc (`depends_on`) vào trạng thái `healthy` của MySQL.
+- **`nekotalk-client` (Next.js 16.3):**
+  - Đóng gói bằng **Multi-stage build**: cài đặt dependencies, build production bundle và chạy với Node 20 Alpine.
+
+---
+
+### 2. Hướng dẫn khởi chạy bằng 1 lệnh duy nhất (Quick Start)
 
 1. **Clone repository:**
    ```bash
@@ -68,75 +109,85 @@ Hệ thống **NekoTalk** là ứng dụng chat đa người dùng trong thời 
    cd BTL_LTM_NekoTalk
    ```
 
-2. **Khởi chạy hệ thống bằng Docker Compose:**
+2. **Khởi chạy toàn bộ hệ thống bằng Docker Compose:**
    ```bash
    docker compose up -d --build
    ```
-   *Docker sẽ tự động tải MySQL 8, build image cho Server & Client, tạo database `chat_online`, thiết lập mạng nội bộ và khởi chạy các container.*
+   *(Docker sẽ tự động tải images, biên dịch Backend & Frontend, cấu hình mạng và khởi chạy 3 container).*
 
 3. **Kiểm tra trạng thái các container:**
    ```bash
    docker compose ps
    ```
+   *Khi cả 3 containers đều hiển thị trạng thái `Up` (và `mysql` ở trạng thái `healthy`) là hệ thống đã sẵn sàng.*
 
 4. **Truy cập ứng dụng:**
-   - **Giao diện Client (Chat):** [http://localhost:3000](http://localhost:3000)
-   - **Backend REST API:** [http://localhost:8080](http://localhost:8080)
-   - **MySQL Database:** `localhost:3306` (User: `root`, Password: `admin`, Database: `chat_online`)
-
-5. **Các lệnh quản lý hữu ích:**
-   ```bash
-   # Xem log realtime của toàn bộ hệ thống
-   docker compose logs -f
-
-   # Chỉ xem log của Spring Boot server
-   docker compose logs -f server
-
-   # Dừng hệ thống
-   docker compose down
-
-   # Dừng và xoá sạch dữ liệu database (nếu muốn reset từ đầu)
-   docker compose down -v
-   ```
+   - 🌐 **Giao diện Client (Chat):** [http://localhost:3000](http://localhost:3000)
+   - 🔌 **Backend REST API:** [http://localhost:8080](http://localhost:8080)
+   - 🗄️ **MySQL Database (kết nối ngoài):** `localhost:3306` (User: `root`, Password: `admin`, DB: `chat_online`)
 
 ---
 
-### Cách 2: Chạy cục bộ (Local Development)
+### 3. Bảng lệnh quản lý Docker thường dùng
 
-#### Yêu cầu môi trường
+| Thao tác | Câu lệnh |
+|---|---|
+| **Xem log realtime tất cả container** | `docker compose logs -f` |
+| **Xem log riêng của backend server** | `docker compose logs -f server` |
+| **Xem log riêng của MySQL** | `docker compose logs -f mysql` |
+| **Dừng hệ thống (giữ nguyên dữ liệu DB)** | `docker compose down` |
+| **Dừng và xoá sạch dữ liệu DB (reset từ đầu)** | `docker compose down -v` |
+| **Rebuild lại sau khi sửa code** | `docker compose up -d --build` |
+| **Khởi động lại toàn bộ containers** | `docker compose restart` |
+
+---
+
+### 4. Xử lý sự cố thường gặp (Troubleshooting)
+
+- **Lỗi trùng cổng (`port is already allocated`):**
+  - *Nguyên nhân:* Cổng `3306`, `8080` hoặc `3000` đang bị dịch vụ khác trên máy thật chiếm dụng (ví dụ MySQL cài sẵn trên máy).
+  - *Xử lý:* Tắt service MySQL local (qua `services.msc` trên Windows) hoặc đổi cổng ánh xạ bên ngoài trong [docker-compose.yml](file:///g:/Workplace/BTL_LTM_NekoTalk/docker-compose.yml) (ví dụ `"3307:3306"`).
+- **Lỗi `Cannot connect to the Docker daemon`:**
+  - *Xử lý:* Đảm bảo ứng dụng **Docker Desktop** đã được mở và đang chạy trước khi gõ lệnh.
+
+---
+
+## 💻 HƯỚNG DẪN CHẠY CỤC BỘ (LOCAL DEVELOPMENT)
+
+Nếu thành viên muốn code và debug trực tiếp trên IDE mà không cần build lại image:
+
+### Yêu cầu môi trường
 - Java 21+
 - Node.js 20+
 - MySQL 8
 
-#### 1. Chuẩn bị Cơ sở dữ liệu
-Khởi tạo database `chat_online`:
+### Bước 1: Chuẩn bị Database
+Tạo database MySQL `chat_online`:
 ```sql
 CREATE DATABASE chat_online CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
-> 💡 **Mẹo:** Bạn có thể dùng Docker để chạy riêng MySQL mà không cần cài MySQL trên máy:
+> 💡 **Mẹo:** Bạn có thể tận dụng Docker để chạy riêng MySQL mà không cần cài MySQL trên máy:
 > ```bash
 > docker compose up mysql -d
 > ```
 
-#### 2. Chạy Backend (Spring Boot)
+### Bước 2: Khởi động Server (Spring Boot)
 ```bash
 cd source/server
-# Cấu hình DB nằm tại src/main/resources/application.yml
+# Linux / macOS:
 ./mvnw spring-boot:run
-# Trên Windows: mvnw.cmd spring-boot:run
+# Windows:
+mvnw.cmd spring-boot:run
 ```
 Server lắng nghe tại: `http://localhost:8080`
 
-#### 3. Chạy Frontend (Next.js)
+### Bước 3: Khởi động Client (Next.js)
 ```bash
 cd source/client
 npm install
 npm run dev
 ```
 Client lắng nghe tại: [http://localhost:3000](http://localhost:3000)
-
-#### 4. Kiểm tra kết nối
-- Đăng ký tài khoản tại [http://localhost:3000/register](http://localhost:3000/register) hoặc đăng nhập tại [http://localhost:3000/login](http://localhost:3000/login).
 
 ---
 
@@ -160,7 +211,7 @@ Client lắng nghe tại: [http://localhost:3000](http://localhost:3000)
 
 | Thành phần | Đường dẫn | Mô tả |
 |---|---|---|
-| **STOMP Endpoint** | `ws://localhost:8080/ws` | Điểm kết nối WebSocket (kèm interceptor xác thực JWT) |
+| **STOMP Endpoint** | `ws://localhost:8080/ws` | Điểm kết nối WebSocket (kèm handshake interceptor xác thực JWT) |
 | **Topic Subscription** | `/topic/conversations/{conversationId}` | Kênh nhận broadcast tin nhắn realtime cho từng cuộc trò chuyện |
 | **User Queue** | `/user/queue/...` | Kênh nhận thông báo điểm-điểm (1-1) của từng người dùng |
 
