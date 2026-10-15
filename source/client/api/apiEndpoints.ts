@@ -7,6 +7,7 @@ export const API_ENDPOINTS = {
   },
   USERS: {
     CREATE: "/api/users",
+    // Endpoint hồ sơ cá nhân; backend xác định user từ access token.
     MY_INFO: "/api/users/my-info",
     SEARCH: "/api/users/search",
   },

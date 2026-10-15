@@ -39,6 +39,7 @@ public class UserController {
                 .build();
     }
 
+    // API lấy hồ sơ của tài khoản đang đăng nhập từ JWT access token.
     @GetMapping("/my-info")
     public ApiResponse<UserDetailResponse> getMyInfo(@AuthenticationPrincipal Jwt jwt) {
         var userId = jwt.getSubject();
