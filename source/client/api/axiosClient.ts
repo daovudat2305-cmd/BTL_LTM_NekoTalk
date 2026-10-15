@@ -73,6 +73,8 @@ axiosClient.interceptors.response.use(
     const isAuthEndpoint =
       originalRequest.url?.includes("/auth/login") ||
       originalRequest.url?.includes("/auth/refresh") ||
+      // Không thử refresh lại khi chính request logout bị từ chối.
+      originalRequest.url?.includes("/auth/logout") ||
       originalRequest.url?.includes("/users");
     if (
       error.response?.status === 401 &&

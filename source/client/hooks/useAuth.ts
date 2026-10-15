@@ -71,14 +71,24 @@ export const useAuth = () => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+  const logout = async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
 
-    document.cookie = "accessToken=; path=/; max-age=0";
-
-    clearUser();
-    router.push("/login");
+    try {
+      // Báo backend thu hồi token trước khi xóa phiên ở client.
+      if (refreshToken) {
+        await authService.logout(refreshToken);
+      }
+    } catch (err) {
+      console.warn("Không thể thu hồi refresh token trên server:", err);
+    } finally {
+      // Luôn xóa phiên trên trình duyệt, kể cả khi backend không phản hồi.
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      document.cookie = "accessToken=; path=/; max-age=0";
+      clearUser();
+      router.replace("/login");
+    }
   };
 
   return {

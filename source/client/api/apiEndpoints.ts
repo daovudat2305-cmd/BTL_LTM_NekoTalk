@@ -2,6 +2,8 @@ export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: "/api/auth/login",
     REFRESH: "/api/auth/refresh",
+    // Endpoint thu hồi refresh token khi đăng xuất.
+    LOGOUT: "/api/auth/logout",
   },
   USERS: {
     CREATE: "/api/users",

@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nekotalk.dto.request.LoginRequest;
+import com.nekotalk.dto.request.LogoutRequest;
 import com.nekotalk.dto.request.RefreshTokenRequest;
 import com.nekotalk.dto.response.ApiResponse;
 import com.nekotalk.dto.response.LoginResponse;
@@ -12,7 +13,10 @@ import com.nekotalk.service.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -42,6 +46,14 @@ public class AuthenticationController {
                 .message("Refresh token successfully")
                 .data(data)
                 .build();
+    }
+    // Logout cần access token hợp lệ và refresh token cần thu hồi.
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody @Valid LogoutRequest request) {
+        authenticationService.logout(jwt.getSubject(), request.getRefreshToken());
+        return ResponseEntity.noContent().build();
     }
     
 }
