@@ -60,6 +60,16 @@ export const useWebSocket = () => {
           frame.headers["message"],
           frame.body,
         );
+        if (frame.headers["message"]?.includes("Unauthorized")) {
+          // Hủy reconnect để tránh spam
+          client.deactivate();
+          setIsConnected(false);
+          // Xóa token hỏng và chuyển hướng người dùng nếu cần
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          document.cookie = "accessToken=; path=/; max-age=0";
+          window.location.href = "/login";
+        }
       },
       onWebSocketClose: () => {
         setIsConnected(false);

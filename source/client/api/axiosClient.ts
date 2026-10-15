@@ -122,7 +122,7 @@ axiosClient.interceptors.response.use(
         if (newRefreshToken) {
           localStorage.setItem("refreshToken", newRefreshToken);
         }
-        document.cookie = `accessToken=${newAccessToken}; path=/; max-age=86400; SameSite=Lax`;
+        document.cookie = `accessToken=${newAccessToken}; path=/; max-age=7200; SameSite=Lax`;
         // Thông báo cho tất cả request đang xếp hàng trong failedQueue
         processQueue(null, newAccessToken);
         // Gán token mới và gửi lại request ban đầu

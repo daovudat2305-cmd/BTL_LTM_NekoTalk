@@ -24,7 +24,7 @@ export const useAuth = () => {
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
 
-        document.cookie = `accessToken=${accessToken}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `accessToken=${accessToken}; path=/; max-age=7200; SameSite=Lax`;
 
         const userInfoResponse = await authService.myInfo();
 
