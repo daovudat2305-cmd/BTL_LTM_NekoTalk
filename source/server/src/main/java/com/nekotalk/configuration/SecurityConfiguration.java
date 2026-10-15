@@ -32,8 +32,10 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfiguration {
 
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/auth/**",
-            "/users",
+            // Chỉ mở login và refresh; logout vẫn yêu cầu JWT.
+            "/api/auth/login",
+            "/api/auth/refresh",
+            "/api/users", // Cho phép đăng ký tài khoản.
             "/ws/**", // Allow WebSocket endpoint
     };
 

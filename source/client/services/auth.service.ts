@@ -35,7 +35,8 @@ export const authService = {
     return response.data;
   },
 
-  logout: () => {
-    // Logout logic handled by Zustand store clearAuth
+  logout: async (refreshToken: string): Promise<void> => {
+    // Gửi refresh token để backend đánh dấu token đã thu hồi.
+    await axiosClient.post(API_ENDPOINTS.AUTH.LOGOUT, { refreshToken });
   },
 };

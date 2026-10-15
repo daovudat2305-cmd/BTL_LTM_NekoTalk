@@ -1,5 +1,10 @@
 package com.nekotalk.service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.util.HexFormat;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,6 +26,9 @@ import com.nekotalk.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import com.nekotalk.entity.RevokedRefreshToken;
+import com.nekotalk.repository.RevokedRefreshTokenRepository;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -29,6 +37,7 @@ public class AuthenticationService {
         private final UserRepository userRepository;
         private final AuthenticationManager authenticationManager;
         private final JwtService jwtService;
+        private final RevokedRefreshTokenRepository revokedRefreshTokenRepository;
 
         @Transactional (readOnly = true)
         public LoginResponse login(LoginRequest request) {
@@ -59,8 +68,14 @@ public class AuthenticationService {
 
         @Transactional (readOnly = true)
         public LoginResponse refreshToken(RefreshTokenRequest request) {
-                String userId = jwtService.validateRefreshToken(request.getRefreshToken());
+                String refreshToken = request.getRefreshToken();
+                String userId = jwtService.validateRefreshToken(refreshToken);
 
+                String tokenHash = hashToken(refreshToken);
+                // Từ chối refresh token đã bị thu hồi.
+                if(revokedRefreshTokenRepository.existsById(tokenHash)){
+                        throw new AppException(ErrorCode.UNAUTHORIZED);
+                }
                 User user = userRepository.findById(userId)
                         .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
                 
@@ -78,4 +93,32 @@ public class AuthenticationService {
                         .refreshToken(newRefreshToken)
                         .build();
         }
+        // Thu hồi refresh token thuộc phiên đăng xuất này.
+        @Transactional
+        public void logout(String authenticatedUserId,String refreshToken){
+                String tokenUserId = jwtService.validateRefreshToken(refreshToken);
+
+                if(!authenticatedUserId.equals(tokenUserId)){
+                        throw new AppException(ErrorCode.UNAUTHORIZED);
+                }
+
+                String tokenHash= hashToken(refreshToken);
+
+                if(!revokedRefreshTokenRepository.existsById(tokenHash)){
+                        revokedRefreshTokenRepository.save(
+                                new RevokedRefreshToken(tokenHash,authenticatedUserId,Instant.now()));
+                }
+
+        }
+        // Chỉ lưu hash token trong cơ sở dữ liệu.
+        private String hashToken(String token){
+                try{
+                        byte[] digest= MessageDigest.getInstance("SHA-256").digest(token.getBytes(StandardCharsets.UTF_8));
+
+                        return HexFormat.of().formatHex(digest);
+                }catch (NoSuchAlgorithmException e){
+                        throw new IllegalStateException("SHA-256 is unavailable",e);
+                }
+        }
+       
 }

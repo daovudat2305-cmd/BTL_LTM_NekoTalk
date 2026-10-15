@@ -1,8 +1,20 @@
-import { MessageCircle, Users, Settings, CircleUser, HelpCircle } from 'lucide-react';
-import Image from 'next/image';
+"use client";
+
+import {
+  MessageCircle,
+  Users,
+  Settings,
+  CircleUser,
+  HelpCircle,
+  LogOut,
+} from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function NavSidebar() {
+  const { logout } = useAuth();
+
   return (
     <nav className="w-[60px] flex flex-col items-center justify-between border-r border-gray-200 py-4">
       {/* Nhóm Icon phía trên */}
@@ -29,7 +41,24 @@ export default function NavSidebar() {
 
       {/* Nhóm Icon phía dưới */}
       <div className="flex flex-col gap-4 items-center">
-        <Button variant="ghost" size="icon" className="w-12 h-12 rounded-xl text-gray-500 hover:bg-gray-100">
+        {/* Nút gọi luồng đăng xuất và thu hồi refresh token. */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="w-12 h-12 rounded-xl text-gray-500 hover:bg-gray-100"
+          aria-label="Đăng xuất"
+          title="Đăng xuất"
+          onClick={() => void logout()}
+        >
+          <LogOut size={24} />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="w-12 h-12 rounded-xl text-gray-500 hover:bg-gray-100"
+          aria-label="Trợ giúp"
+          title="Trợ giúp"
+        >
           <HelpCircle size={28} />
         </Button>
       </div>
