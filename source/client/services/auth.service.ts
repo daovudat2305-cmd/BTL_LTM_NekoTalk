@@ -28,6 +28,7 @@ export const authService = {
     return response.data;
   },
 
+  // Gọi API hồ sơ hiện tại; axiosClient tự đính kèm access token.
   myInfo: async (): Promise<ApiResponse<UserDetailResponse>> => {
     const response = await axiosClient.get<ApiResponse<UserDetailResponse>>(
       API_ENDPOINTS.USERS.MY_INFO,

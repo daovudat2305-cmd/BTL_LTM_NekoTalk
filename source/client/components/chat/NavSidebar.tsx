@@ -9,6 +9,7 @@ import {
   LogOut,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -33,9 +34,17 @@ export default function NavSidebar() {
           <Button variant="ghost" size="icon" className="w-12 h-12 rounded-xl text-gray-500 hover:bg-gray-100">
             <Settings size={28} />
           </Button>
-          <Button variant="ghost" size="icon" className="w-12 h-12 rounded-xl text-gray-500 hover:bg-gray-100">
-            <CircleUser size={28} />
-          </Button>
+          {/* Mở trang hồ sơ chỉ đọc của tài khoản đang đăng nhập. */}
+          <Link href="/chat/profile" aria-label="Thông tin người dùng" title="Thông tin người dùng">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-12 h-12 rounded-xl text-gray-500 hover:bg-gray-100"
+              aria-label="Thông tin người dùng"
+            >
+              <CircleUser size={28} />
+            </Button>
+          </Link>
         </div>
       </div>
 
