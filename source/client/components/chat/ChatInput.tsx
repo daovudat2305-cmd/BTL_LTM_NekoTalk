@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Mic,
   Image as ImageIcon,
@@ -15,10 +15,55 @@ import { Input } from "@/components/ui/input";
 
 export default function ChatInput({ chatId }: { chatId: string }) {
   const [content, setContent] = useState("");
-  const { sendMessage, sending } = useChatStore();
+  const { sendMessage, sending, sendTyping } = useChatStore();
+
+  const isTypingRef = useRef(false);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const stopTyping = useCallback(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    if (isTypingRef.current) {
+      isTypingRef.current = false;
+      sendTyping(chatId, false);
+    }
+  }, [chatId, sendTyping]);
+
+  useEffect(() => {
+    return () => {
+      stopTyping();
+    };
+  }, [chatId, stopTyping]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setContent(value);
+
+    if (!value.trim()) {
+      stopTyping();
+      return;
+    }
+
+    if (!isTypingRef.current) {
+      isTypingRef.current = true;
+      sendTyping(chatId, true);
+    }
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      isTypingRef.current = false;
+      sendTyping(chatId, false);
+    }, 2500);
+  };
 
   const handleSend = async () => {
     if (!content.trim() || sending) return;
+
+    stopTyping();
 
     try {
       await sendMessage(chatId, content);
@@ -69,7 +114,7 @@ export default function ChatInput({ chatId }: { chatId: string }) {
             type="text"
             placeholder="Aa"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             className="flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 text-[17px] px-0 h-9"
             disabled={sending}

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Client, IMessage } from "@stomp/stompjs";
 import { useChatStore } from "@/store/useChatStore";
-import { ChatMessageResponse } from "@/types";
+import { ChatMessageResponse, TypingNotification } from "@/types";
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8080/ws";
 
@@ -9,6 +9,7 @@ export const useWebSocket = () => {
   const stompClient = useRef<Client | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const receiveMessage = useChatStore((s) => s.receiveMessage);
+  const setTypingUser = useChatStore((s) => s.setTypingUser);
 
   const receiveMessageRef = useRef(receiveMessage);
   useEffect(() => {
@@ -42,6 +43,7 @@ export const useWebSocket = () => {
       onConnect: () => {
         console.log("[WebSocket] Đã kết nối STOMP thành công.");
         setIsConnected(true);
+        useChatStore.getState().setStompClient(client);
         // Lắng nghe tin nhắn cá nhân từ server
         client.subscribe("/user/queue/messages", (message: IMessage) => {
           try {
@@ -51,6 +53,20 @@ export const useWebSocket = () => {
             }
           } catch (error) {
             console.error("[WebSocket] Lỗi parse tin nhắn JSON:", error);
+          }
+        });
+
+        client.subscribe("/user/queue/typing", (message: IMessage) => {
+          try {
+            if (message.body) {
+              const data: TypingNotification = JSON.parse(message.body);
+              console.log("[Typing] 📥 Nhận được event từ server:", data);
+              useChatStore
+                .getState()
+                .setTypingUser(data.conversationId, data.username, data.isTyping);
+            }
+          } catch (err) {
+            console.error("[WebSocket] Lỗi parse typing frame:", err);
           }
         });
       },
@@ -73,6 +89,7 @@ export const useWebSocket = () => {
       },
       onWebSocketClose: () => {
         setIsConnected(false);
+        useChatStore.getState().setStompClient(null);
         console.log("[WebSocket] Kết nối WebSocket đã đóng.");
       },
     });
@@ -86,6 +103,7 @@ export const useWebSocket = () => {
       stompClient.current.deactivate();
       stompClient.current = null;
       setIsConnected(false);
+      useChatStore.getState().setStompClient(null);
       console.log("[WebSocket] Đã ngắt kết nối WebSocket.");
     }
   }, []);
@@ -98,9 +116,22 @@ export const useWebSocket = () => {
     };
   }, [connect, disconnect]);
 
+  const sendTypingStatus = useCallback(
+    (conversationId: string, isTyping: boolean) => {
+      if (stompClient.current && stompClient.current.connected) {
+        stompClient.current.publish({
+          destination: "/app/chat.typing",
+          body: JSON.stringify({ conversationId, isTyping }),
+        });
+      }
+    },
+    [],
+  );
+
   return {
     isConnected,
     client: stompClient.current,
+    sendTypingStatus,
     reconnect: connect,
     disconnect,
   };

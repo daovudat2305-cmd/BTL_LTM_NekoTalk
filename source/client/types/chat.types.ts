@@ -73,3 +73,10 @@ export interface PresenceEvent {
   isOnline: boolean;
   lastOnlineAt: string | null;
 }
+
+export interface TypingNotification {
+  conversationId: string;
+  userId: string;
+  username: string;
+  isTyping: boolean;
+}

@@ -3,6 +3,9 @@
 import { useChatStore } from "@/store/useChatStore";
 import { useUserStore } from "@/store/useUserStore";
 import { useEffect, useRef } from "react";
+import TypingIndicator from "./TypingIndicator";
+
+const EMPTY_TYPING_USERS: string[] = [];
 
 export default function MessageList({ chatId }: { chatId: string }) {
   const { fetchMessages, messages, loadingMessages } = useChatStore();
@@ -10,6 +13,9 @@ export default function MessageList({ chatId }: { chatId: string }) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const chatMessages = messages[chatId] || [];
+
+  const typingUsers =
+    useChatStore((s) => s.typingUsers[chatId]) ?? EMPTY_TYPING_USERS;
 
   //tải tin nhắn khi mở phòng chat
   useEffect(() => {
@@ -21,7 +27,7 @@ export default function MessageList({ chatId }: { chatId: string }) {
   //cuộn xuống khi có tin nhắn mới
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages]);
+  }, [chatMessages, typingUsers]);
 
   if (loadingMessages && chatMessages.length === 0) {
     return (
@@ -66,6 +72,9 @@ export default function MessageList({ chatId }: { chatId: string }) {
           );
         })
       )}
+
+      <TypingIndicator usernames={typingUsers} />
+
       {/* Element ẩn để cuộn xuống */}
       <div ref={bottomRef} />
     </div>

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { Client } from "@stomp/stompjs";
 import {
   ConversationDetailResponse,
   ChatMessageResponse,
@@ -7,6 +8,9 @@ import {
 import { conversationService } from "@/services/conversation.service";
 import { messageService } from "@/services/message.service";
 
+// Map lưu timer tự động hủy trạng thái typing cho từng user trong từng phòng chat
+const typingTimeouts = new Map<string, NodeJS.Timeout>();
+
 interface ChatState {
   conversations: ConversationDetailResponse[];
   activeConversation: ConversationDetailResponse | null;
@@ -14,6 +18,8 @@ interface ChatState {
   loadingConversations: boolean;
   loadingMessages: boolean;
   sending: boolean;
+  typingUsers: Record<string, string[]>;
+  stompClient: Client | null;
 
   fetchConversations: () => Promise<void>;
   setActiveConversation: (
@@ -22,6 +28,13 @@ interface ChatState {
   fetchMessages: (conversationId: string) => Promise<void>;
   sendMessage: (conversationId: string, content: string) => Promise<void>;
   receiveMessage: (message: ChatMessageResponse) => void;
+  setStompClient: (client: Client | null) => void;
+  setTypingUser: (
+    conversationId: string,
+    username: string,
+    isTyping: boolean,
+  ) => void;
+  sendTyping: (conversationId: string, isTyping: boolean) => void;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -31,6 +44,28 @@ export const useChatStore = create<ChatState>((set, get) => ({
   loadingConversations: false,
   loadingMessages: false,
   sending: false,
+  typingUsers: {},
+  stompClient: null,
+
+  setStompClient: (client) => {
+    set({ stompClient: client });
+  },
+
+  sendTyping: (conversationId, isTyping) => {
+    const client = get().stompClient;
+    if (client && client.connected) {
+      console.log(`[Typing] 📤 Gửi frame /app/chat.typing:`, {
+        conversationId,
+        isTyping,
+      });
+      client.publish({
+        destination: "/app/chat.typing",
+        body: JSON.stringify({ conversationId, isTyping }),
+      });
+    } else {
+      console.warn("[Typing] ⚠️ STOMP client chưa sẵn sàng hoặc mất kết nối:", client);
+    }
+  },
 
   fetchConversations: async () => {
     try {
@@ -171,6 +206,44 @@ export const useChatStore = create<ChatState>((set, get) => ({
       return {
         messages: updatedMessages,
         conversations: updatedConversations,
+      };
+    });
+  },
+
+  setTypingUser: (conversationId, username, isTyping) => {
+    const timerKey = `${conversationId}:${username}`;
+
+    // Xóa timeout cũ nếu có
+    if (typingTimeouts.has(timerKey)) {
+      clearTimeout(typingTimeouts.get(timerKey)!);
+      typingTimeouts.delete(timerKey);
+    }
+
+    if (isTyping) {
+      // Đặt Fail-Safe Timeout: Sau 3.5s tự động xóa nếu không nhận thêm tín hiệu
+      const timeout = setTimeout(() => {
+        get().setTypingUser(conversationId, username, false);
+        typingTimeouts.delete(timerKey);
+      }, 3500);
+
+      typingTimeouts.set(timerKey, timeout);
+    }
+
+    set((state) => {
+      const currentList = state.typingUsers[conversationId] || [];
+      let updatedList: string[];
+      if (isTyping) {
+        updatedList = currentList.includes(username)
+          ? currentList
+          : [...currentList, username];
+      } else {
+        updatedList = currentList.filter((u) => u !== username);
+      }
+      return {
+        typingUsers: {
+          ...state.typingUsers,
+          [conversationId]: updatedList,
+        },
       };
     });
   },
