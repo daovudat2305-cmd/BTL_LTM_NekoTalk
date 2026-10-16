@@ -41,7 +41,7 @@
 - [x] **Phân trang lịch sử tin nhắn:** Hỗ trợ pagination khi tải lại tin nhắn cũ trong hội thoại.
 
 ### Tính Năng Đang Triển Khai & Cần Bổ Sung 🎯
-- [ ] **Typing Indicator (Đang nhập văn bản...):** Gửi event realtime khi đối phương đang gõ phím.
+- [x] **Typing Indicator (Đang nhập văn bản...):** Gửi event realtime khi đối phương đang gõ phím.
 - [ ] **Read Receipts (Đã nhận / Đã xem):** Cập nhật trạng thái tin nhắn đã đọc.
 - [ ] **Quản lý hồ sơ người dùng:** Cập nhật thông tin cá nhân và avatar.
 - [ ] **Gọi thoại & Video Call (WebRTC):** Thiết lập kết nối P2P qua Signaling Server trên nền WebSocket có sẵn.
@@ -260,8 +260,8 @@ Xem chi tiết bộ câu hỏi và đáp án chuẩn lý thuyết mạng tại f
   - [x] Cấu hình Docker Compose đa tầng
   - [x] Viết hướng dẫn `README.md`
 - [ ] **Tính năng Chat hoàn thiện**
-  - [ ] Typing Indicator (Backend STOMP endpoint)
-  - [ ] Typing Indicator (Frontend UI)
+  - [x] Typing Indicator (Backend STOMP endpoint)
+  - [x] Typing Indicator (Frontend UI)
   - [ ] Read Receipts (Backend DB + Socket)
   - [ ] Read Receipts (Frontend tick UI)
 - [ ] **WebRTC Voice & Video Call**
