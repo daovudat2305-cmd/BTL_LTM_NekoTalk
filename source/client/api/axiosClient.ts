@@ -13,11 +13,18 @@ const axiosClient: AxiosInstance = axios.create({
   timeout: 10000,
 });
 
+// Các endpoint xác thực không cần đính kèm token (tránh gửi token hết hạn)
+const AUTH_SKIP_ENDPOINTS = ["/auth/login", "/auth/refresh", "/users"];
+
 //Request interceptor
 axiosClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    //get token
-    if (typeof window !== "undefined") {
+    // Không đính kèm token cho các auth endpoint để tránh lỗi 401
+    // khi access token đã hết hạn nhưng vẫn còn trong localStorage.
+    const isAuthSkipEndpoint = AUTH_SKIP_ENDPOINTS.some((ep) =>
+      config.url?.includes(ep),
+    );
+    if (typeof window !== "undefined" && !isAuthSkipEndpoint) {
       const token = localStorage.getItem("accessToken");
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
