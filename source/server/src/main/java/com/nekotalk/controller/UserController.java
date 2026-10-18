@@ -2,9 +2,11 @@ package com.nekotalk.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.nekotalk.dto.request.CreateUserRequest;
 import com.nekotalk.dto.response.ApiResponse;
+import com.nekotalk.dto.response.AvatarUploadResponse;
 import com.nekotalk.dto.response.CreateUserResponse;
 import com.nekotalk.dto.response.PageResponse;
 import com.nekotalk.dto.response.UserDetailResponse;
@@ -65,6 +67,21 @@ public class UserController {
                 .message("Users retrieved successfully")
                 .data(data)
                 .build();
+    }
+
+    @PostMapping("/avatar")
+    public ApiResponse<AvatarUploadResponse> updateAvatar(
+        @AuthenticationPrincipal Jwt jwt,
+        @RequestParam("file") MultipartFile file
+    ) {
+        var userId = jwt.getSubject();
+        var data = userService.updateAvatar(userId, file);
+
+        return ApiResponse.<AvatarUploadResponse>builder()
+            .code(HttpStatus.OK.value())
+            .message("Cập nhật ảnh đại diện thành công")
+            .data(data)
+            .build();
     }
 
 }

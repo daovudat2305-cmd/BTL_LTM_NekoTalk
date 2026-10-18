@@ -43,7 +43,7 @@
 ### Tính Năng Đang Triển Khai & Cần Bổ Sung 🎯
 - [x] **Typing Indicator (Đang nhập văn bản...):** Gửi event realtime khi đối phương đang gõ phím.
 - [ ] **Read Receipts (Đã nhận / Đã xem):** Cập nhật trạng thái tin nhắn đã đọc.
-- [ ] **Quản lý hồ sơ người dùng:** Cập nhật thông tin cá nhân và avatar.
+- [ ] **Quản lý hồ sơ người dùng:** Cập nhật thông tin cá nhân và avatar.min
 - [ ] **Gọi thoại & Video Call (WebRTC):** Thiết lập kết nối P2P qua Signaling Server trên nền WebSocket có sẵn.
 - [ ] **Dữ liệu mẫu (`dataset_sample.csv`):** Cung cấp sample dataset phục vụ chấm thi.
 

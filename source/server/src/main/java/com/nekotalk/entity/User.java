@@ -32,6 +32,9 @@ public class User implements UserDetails {
 
     String password;
 
+    @Column(name = "avatar_url")
+    String avatarUrl;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     List<UserHasRole> userHasRoles = new ArrayList<>();
