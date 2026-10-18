@@ -6,5 +6,6 @@ import lombok.Builder;
 public record UserDetailResponse(
         String userId,
         String email,
-        String username) {
-}
+        String username,
+        String avatarUrl
+) {}

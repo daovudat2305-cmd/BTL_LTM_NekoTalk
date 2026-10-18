@@ -7,8 +7,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.nekotalk.dto.request.CreateUserRequest;
+import com.nekotalk.dto.response.AvatarUploadResponse;
 import com.nekotalk.dto.response.CreateUserResponse;
 import com.nekotalk.dto.response.PageResponse;
 import com.nekotalk.dto.response.UserDetailResponse;
@@ -25,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import static com.nekotalk.constant.AppConstant.USER_ROLE;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +37,7 @@ public class UserService {
         private final UserRepository userRepository;
         private final RoleRepository roleRepository;
         private final PasswordEncoder passwordEncoder;
+        private final CloudinaryService cloudinaryService;
 
         public CreateUserResponse createUser(CreateUserRequest request) {
                 if (userRepository.existsByEmail(request.getEmail())) {
@@ -69,6 +72,7 @@ public class UserService {
                                 .userId(user.getId())
                                 .email(user.getEmail())
                                 .username(user.getUsername())
+                                .avatarUrl(user.getAvatarUrl())
                                 .build();
 
                 return response;
@@ -93,6 +97,7 @@ public class UserService {
                                                 .userId(user.getId())
                                                 .email(user.getEmail())
                                                 .username(user.getUsername())
+                                                .avatarUrl(user.getAvatarUrl())
                                                 .build())
                                 .toList();
 
@@ -103,5 +108,20 @@ public class UserService {
                                 .totalElements(users.getTotalElements())
                                 .content(content)
                                 .build();
+        }
+
+        @Transactional
+        public AvatarUploadResponse updateAvatar(String userId, MultipartFile file) {
+                User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+                
+                String secureAvatarUrl = cloudinaryService.uploadAvatar(file);
+
+                user.setAvatarUrl(secureAvatarUrl);
+                userRepository.save(user);
+
+                return AvatarUploadResponse.builder()
+                        .avatarUrl(secureAvatarUrl)
+                        .build();
         }
 }

@@ -7,6 +7,8 @@ interface UserState {
 
   setUser: (user: UserDetailResponse) => void;
   clearUser: () => void;
+
+  updateAvatar: (avatarUrl: string) => void;
 }
 
 export const useUserStore = create<UserState>()(
@@ -16,6 +18,11 @@ export const useUserStore = create<UserState>()(
 
       setUser: (user) => set({ user }),
       clearUser: () => set({ user: null }),
+
+      updateAvatar: (avatarUrl) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, avatarUrl } : null,
+        })),
     }),
     {
       name: "user-storage",

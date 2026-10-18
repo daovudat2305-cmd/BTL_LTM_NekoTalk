@@ -14,15 +14,22 @@ const axiosClient: AxiosInstance = axios.create({
 });
 
 // Các endpoint xác thực không cần đính kèm token (tránh gửi token hết hạn)
-const AUTH_SKIP_ENDPOINTS = ["/auth/login", "/auth/refresh", "/users"];
+// Dùng exact-match để tránh /users/my-info, /users/search, v.v. bị bỏ qua token.
+const AUTH_SKIP_ENDPOINTS = [
+  "/api/auth/login",
+  "/api/auth/refresh",
+  "/api/users",          // POST tạo user (register) - không cần token
+];
 
 //Request interceptor
 axiosClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Không đính kèm token cho các auth endpoint để tránh lỗi 401
     // khi access token đã hết hạn nhưng vẫn còn trong localStorage.
-    const isAuthSkipEndpoint = AUTH_SKIP_ENDPOINTS.some((ep) =>
-      config.url?.includes(ep),
+    // So sánh chính xác URL (exact-match) thay vì includes() để tránh
+    // /api/users/my-info bị nhầm skip vì chứa chuỗi "/api/users".
+    const isAuthSkipEndpoint = AUTH_SKIP_ENDPOINTS.some(
+      (ep) => config.url === ep || config.url?.endsWith(ep),
     );
     if (typeof window !== "undefined" && !isAuthSkipEndpoint) {
       const token = localStorage.getItem("accessToken");
@@ -77,12 +84,14 @@ axiosClient.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
+    // Dùng exact-match / endsWith để tránh /users/my-info bị nhầm là auth endpoint.
     const isAuthEndpoint =
       originalRequest.url?.includes("/auth/login") ||
       originalRequest.url?.includes("/auth/refresh") ||
       // Không thử refresh lại khi chính request logout bị từ chối.
       originalRequest.url?.includes("/auth/logout") ||
-      originalRequest.url?.includes("/users");
+      originalRequest.url === "/api/users" ||
+      originalRequest.url?.endsWith("/api/users");
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&

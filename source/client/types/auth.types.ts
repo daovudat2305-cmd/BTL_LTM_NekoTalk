@@ -24,4 +24,8 @@ export interface UserDetailResponse {
   userId: string;
   email: string;
   username: string;
+  avatarUrl?: string;
+}
+export interface AvatarUploadResponse {
+  avatarUrl: string;
 }
