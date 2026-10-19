@@ -31,7 +31,7 @@ public interface ConversationRepository extends JpaRepository<Conversation, Stri
                         SELECT DISTINCT c FROM Conversation c
                         JOIN c.participants p
                         WHERE p.user.id = :userId
-                        ORDER BY c.lastMessageTime DESC NULLS LAST
+                        ORDER BY COALESCE(c.lastMessageTime, c.createdAt) DESC
                         """)
         Page<Conversation> findAllByUserId(@Param("userId") String userId, Pageable pageable);
 
@@ -40,6 +40,7 @@ public interface ConversationRepository extends JpaRepository<Conversation, Stri
                         LEFT JOIN FETCH c.participants p
                         LEFT JOIN FETCH p.user
                         WHERE c.id IN :conversationIds
+                        ORDER BY COALESCE(c.lastMessageTime, c.createdAt) DESC
                         """)
         List<Conversation> findByIdInWithParticipants(@Param("conversationIds") List<String> conversationIds);
 
