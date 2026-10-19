@@ -7,6 +7,7 @@ import {
 } from "@/types";
 import { conversationService } from "@/services/conversation.service";
 import { messageService } from "@/services/message.service";
+import { parseDate } from "@/lib/date";
 
 // Map lưu timer tự động hủy trạng thái typing cho từng user trong từng phòng chat
 const typingTimeouts = new Map<string, NodeJS.Timeout>();
@@ -14,8 +15,8 @@ const typingTimeouts = new Map<string, NodeJS.Timeout>();
 // Helper sắp xếp: Ưu tiên lastMessageTime, nếu chưa có tin nhắn thì dùng createdAt
 const sortConversationsList = (list: ConversationDetailResponse[]) => {
   return [...list].sort((a, b) => {
-    const timeA = new Date(a.lastMessageTime || a.createdAt || 0).getTime();
-    const timeB = new Date(b.lastMessageTime || b.createdAt || 0).getTime();
+    const timeA = parseDate(a.lastMessageTime || a.createdAt)?.getTime() || 0;
+    const timeB = parseDate(b.lastMessageTime || b.createdAt)?.getTime() || 0;
     return timeB - timeA;
   });
 };
@@ -30,6 +31,8 @@ interface ChatState {
   typingUsers: Record<string, string[]>;
   stompClient: Client | null;
 
+  lastChatId: string | null;
+  setLastChatId: (id: string | null) => void;
   fetchConversations: () => Promise<void>;
   setActiveConversation: (
     conversation: ConversationDetailResponse | null,
@@ -55,6 +58,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
   sending: false,
   typingUsers: {},
   stompClient: null,
+  lastChatId: null,
+
+  setLastChatId: (id) => {
+    set({ lastChatId: id });
+  },
 
   setStompClient: (client) => {
     set({ stompClient: client });

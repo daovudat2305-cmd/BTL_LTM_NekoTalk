@@ -26,11 +26,17 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function ChatListSidebar() {
-  const { conversations, fetchConversations, loadingConversations } =
+  const { conversations, fetchConversations, loadingConversations, setLastChatId } =
     useChatStore();
   const currentUser = useUserStore((s) => s.user);
   const params = useParams();
   const currentChatId = params?.chatId as string;
+
+  useEffect(() => {
+    if (currentChatId) {
+      setLastChatId(currentChatId);
+    }
+  }, [currentChatId, setLastChatId]);
 
   //tìm kiếm user
   const [searchQuery, setSearchQuery] = useState("");
@@ -220,6 +226,7 @@ export default function ChatListSidebar() {
                       name: name,
                       message: lastMsg,
                       avatarUrl: avatarUrl,
+                      time: chat.lastMessageTime,
                     }}
                   />
                 </div>
