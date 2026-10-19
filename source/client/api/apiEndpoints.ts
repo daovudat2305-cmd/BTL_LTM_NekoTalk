@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
   CONVERSATIONS: {
     CREATE: "/api/conversations",
     MY_CONVERSATIONS: "/api/conversations/my-conversation",
+    UPLOAD_AVATAR: "/api/conversations/avatar",
   },
   MESSAGES: {
     SEND: "/api/chat-messages",

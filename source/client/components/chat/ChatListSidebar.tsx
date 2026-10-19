@@ -2,11 +2,12 @@
 
 import { MoreHorizontal, SquarePen, Search } from "lucide-react";
 import ChatItem from "./ChatItem";
+import CreateGroupDialog from "./CreateGroupDialog";
 import Link from "next/link";
 import { useChatStore } from "@/store/useChatStore";
 import { useUserStore } from "@/store/useUserStore";
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   ConversationDetailResponse,
   ConversationType,
@@ -38,7 +39,11 @@ export default function ChatListSidebar() {
     }
   }, [currentChatId, setLastChatId]);
 
-  //tìm kiếm user
+  // Bộ lọc tabs và tìm kiếm
+  const [filterTab, setFilterTab] = useState<"ALL" | "PRIVATE" | "GROUP">("ALL");
+  const [conversationFilter, setConversationFilter] = useState("");
+
+  // Tìm kiếm user để chat 1-1
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<UserDetailResponse[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -66,7 +71,7 @@ export default function ChatListSidebar() {
     };
   };
 
-  //tìm kiếm user (xử lý search)
+  // Tìm kiếm user (xử lý search 1-1)
   const handleSearchUser = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setSearchQuery(val);
@@ -96,20 +101,42 @@ export default function ChatListSidebar() {
     }
   };
 
+  // Danh sách hội thoại sau khi lọc theo Tab và Search box
+  const filteredConversations = useMemo(() => {
+    return conversations.filter((chat) => {
+      if (filterTab === "GROUP" && chat.conversationType !== ConversationType.GROUP) {
+        return false;
+      }
+      if (filterTab === "PRIVATE" && chat.conversationType !== ConversationType.PRIVATE) {
+        return false;
+      }
+      if (conversationFilter.trim()) {
+        const { name } = getDisplayInfo(chat);
+        return name.toLowerCase().includes(conversationFilter.trim().toLowerCase());
+      }
+      return true;
+    });
+  }, [conversations, filterTab, conversationFilter, currentUser?.userId]);
+
   return (
     <aside className="w-[360px] flex flex-col border-r border-gray-200 bg-white">
       {/* Header */}
       <div className="flex items-center justify-between p-4">
         <h2 className="text-2xl font-bold">Đoạn chat</h2>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <Button
             variant="ghost"
             size="icon"
             className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200"
+            title="Tùy chọn khác"
           >
             <MoreHorizontal size={22} />
           </Button>
 
+          {/* Nút Tạo nhóm chat */}
+          <CreateGroupDialog />
+
+          {/* Nút Tin nhắn mới (Chat 1-1) */}
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger
               render={
@@ -117,6 +144,8 @@ export default function ChatListSidebar() {
                   variant="ghost"
                   size="icon"
                   className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200"
+                  title="Tin nhắn mới"
+                  aria-label="Tin nhắn mới"
                 />
               }
             >
@@ -170,6 +199,8 @@ export default function ChatListSidebar() {
           <Input
             type="text"
             placeholder="Tìm kiếm trên Messenger"
+            value={conversationFilter}
+            onChange={(e) => setConversationFilter(e.target.value)}
             className="bg-transparent border-none outline-none shadow-none focus-visible:ring-0 px-0 h-auto text-sm"
           />
         </div>
@@ -179,19 +210,34 @@ export default function ChatListSidebar() {
       <div className="flex gap-2 px-4 py-2 mb-2">
         <Button
           variant="ghost"
-          className="px-3 py-1.5 h-auto bg-gray-100 rounded-full text-sm font-semibold"
+          onClick={() => setFilterTab("ALL")}
+          className={`px-3 py-1.5 h-auto rounded-full text-sm font-semibold transition ${
+            filterTab === "ALL"
+              ? "bg-gray-100 text-black font-bold"
+              : "text-gray-600 hover:bg-gray-100"
+          }`}
         >
           Tất cả
         </Button>
         <Button
           variant="ghost"
-          className="px-3 py-1.5 h-auto hover:bg-gray-100 rounded-full text-sm font-medium text-gray-600"
+          onClick={() => setFilterTab("PRIVATE")}
+          className={`px-3 py-1.5 h-auto rounded-full text-sm font-medium transition ${
+            filterTab === "PRIVATE"
+              ? "bg-gray-100 text-black font-bold"
+              : "text-gray-600 hover:bg-gray-100"
+          }`}
         >
-          Chưa đọc
+          Cá nhân
         </Button>
         <Button
           variant="ghost"
-          className="px-3 py-1.5 h-auto hover:bg-gray-100 rounded-full text-sm font-medium text-gray-600"
+          onClick={() => setFilterTab("GROUP")}
+          className={`px-3 py-1.5 h-auto rounded-full text-sm font-medium transition ${
+            filterTab === "GROUP"
+              ? "bg-gray-100 text-black font-bold"
+              : "text-gray-600 hover:bg-gray-100"
+          }`}
         >
           Nhóm
         </Button>
@@ -203,12 +249,18 @@ export default function ChatListSidebar() {
           <div className="p-4 text-sm text-center text-gray-500">
             Đang tải cuộc trò chuyện...
           </div>
-        ) : conversations.length === 0 ? (
+        ) : filteredConversations.length === 0 ? (
           <div className="p-4 text-sm text-center text-gray-400">
-            Chưa có cuộc trò chuyện nào
+            {filterTab === "GROUP"
+              ? "Chưa có cuộc trò chuyện nhóm nào"
+              : filterTab === "PRIVATE"
+                ? "Chưa có cuộc trò chuyện cá nhân nào"
+                : conversationFilter.trim()
+                  ? "Không tìm thấy cuộc trò chuyện nào"
+                  : "Chưa có cuộc trò chuyện nào"}
           </div>
         ) : (
-          conversations.map((chat) => {
+          filteredConversations.map((chat) => {
             const { name, avatarUrl } = getDisplayInfo(chat);
             const lastMsg =
               chat.lastMessageContent || "Bắt đầu cuộc trò chuyện";

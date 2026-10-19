@@ -40,6 +40,7 @@ interface ChatState {
   fetchMessages: (conversationId: string) => Promise<void>;
   sendMessage: (conversationId: string, content: string) => Promise<void>;
   receiveMessage: (message: ChatMessageResponse) => void;
+  addConversation: (conversation: ConversationDetailResponse) => void;
   setStompClient: (client: Client | null) => void;
   setTypingUser: (
     conversationId: string,
@@ -59,6 +60,25 @@ export const useChatStore = create<ChatState>((set, get) => ({
   typingUsers: {},
   stompClient: null,
   lastChatId: null,
+
+  addConversation: (newConv) => {
+    set((state) => {
+      const exists = state.conversations.some((c) => c.id === newConv.id);
+      if (exists) {
+        return {
+          conversations: sortConversationsList(
+            state.conversations.map((c) =>
+              c.id === newConv.id ? { ...c, ...newConv } : c,
+            ),
+          ),
+        };
+      }
+
+      return {
+        conversations: sortConversationsList([newConv, ...state.conversations]),
+      };
+    });
+  },
 
   setLastChatId: (id) => {
     set({ lastChatId: id });

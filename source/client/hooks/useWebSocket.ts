@@ -1,7 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Client, IMessage } from "@stomp/stompjs";
 import { useChatStore } from "@/store/useChatStore";
-import { ChatMessageResponse, TypingNotification } from "@/types";
+import {
+  ChatMessageResponse,
+  ConversationDetailResponse,
+  ConversationType,
+  TypingNotification,
+} from "@/types";
+import { toast } from "sonner";
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8080/ws";
 
@@ -53,6 +59,22 @@ export const useWebSocket = () => {
             }
           } catch (error) {
             console.error("[WebSocket] Lỗi parse tin nhắn JSON:", error);
+          }
+        });
+
+        // Lắng nghe cuộc trò chuyện mới (nhóm mới được tạo / thêm vào nhóm)
+        client.subscribe("/user/queue/conversations", (message: IMessage) => {
+          try {
+            if (message.body) {
+              const newConv: ConversationDetailResponse = JSON.parse(message.body);
+              console.log("[WebSocket] 📥 Nhận được cuộc trò chuyện mới:", newConv);
+              useChatStore.getState().addConversation(newConv);
+              if (newConv.conversationType === ConversationType.GROUP) {
+                toast.info(`Bạn đã được thêm vào nhóm "${newConv.name || "Nhóm trò chuyện"}"`);
+              }
+            }
+          } catch (error) {
+            console.error("[WebSocket] Lỗi parse conversation frame:", error);
           }
         });
 

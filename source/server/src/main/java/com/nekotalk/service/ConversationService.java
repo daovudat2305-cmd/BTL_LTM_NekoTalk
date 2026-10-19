@@ -26,14 +26,18 @@ import com.nekotalk.mapper.ConversationMapper;
 import com.nekotalk.repository.ConversationRepository;
 import com.nekotalk.repository.UserRepository;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ConversationService {
 
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     public CreateConversationResponse createConversation(String creatorId, CreateConversationRequest request) {
         List<String> participantIds = request.participantIds();
@@ -88,6 +92,17 @@ public class ConversationService {
         participantInfos.forEach(conversation::addParticipant);
 
         conversationRepository.save(conversation);
+
+        // Bắn WebSocket thông báo tới các thành viên (những người được thêm vào nhóm/cuộc trò chuyện)
+        for (User participant : participantInfos) {
+            String memberId = participant.getId();
+            try {
+                ConversationDetailResponse detail = ConversationMapper.toConversationDetailResponse(memberId, conversation);
+                simpMessagingTemplate.convertAndSendToUser(memberId, "/queue/conversations", detail);
+            } catch (Exception e) {
+                log.error("Failed to push conversation notification to user {}: {}", memberId, e.getMessage());
+            }
+        }
 
         return ConversationMapper.toConversationResponse(creatorId, conversation);
     }
