@@ -2,7 +2,10 @@ package com.nekotalk.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -104,7 +107,13 @@ public class ConversationService {
         List<Conversation> conversationsWithParticipants = conversationIds.isEmpty() ? List.of()
                 : conversationRepository.findByIdInWithParticipants(conversationIds);
 
-        List<ConversationDetailResponse> responses = conversationsWithParticipants.stream()
+        // Dùng Map để khôi phục đúng thứ tự ban đầu từ conversationIds (Step 1)
+        Map<String, Conversation> conversationMap = conversationsWithParticipants.stream()
+            .collect(Collectors.toMap(Conversation::getId, Function.identity()));
+
+        List<ConversationDetailResponse> responses = conversationIds.stream()
+                .map(conversationMap::get)
+                .filter(Objects::nonNull)
                 .map(conversation -> ConversationMapper.toConversationDetailResponse(userId, conversation))
                 .toList();
 

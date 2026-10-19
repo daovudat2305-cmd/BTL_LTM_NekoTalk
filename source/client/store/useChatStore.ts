@@ -11,6 +11,15 @@ import { messageService } from "@/services/message.service";
 // Map lưu timer tự động hủy trạng thái typing cho từng user trong từng phòng chat
 const typingTimeouts = new Map<string, NodeJS.Timeout>();
 
+// Helper sắp xếp: Ưu tiên lastMessageTime, nếu chưa có tin nhắn thì dùng createdAt
+const sortConversationsList = (list: ConversationDetailResponse[]) => {
+  return [...list].sort((a, b) => {
+    const timeA = new Date(a.lastMessageTime || a.createdAt || 0).getTime();
+    const timeB = new Date(b.lastMessageTime || b.createdAt || 0).getTime();
+    return timeB - timeA;
+  });
+};
+
 interface ChatState {
   conversations: ConversationDetailResponse[];
   activeConversation: ConversationDetailResponse | null;
@@ -63,7 +72,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
         body: JSON.stringify({ conversationId, isTyping }),
       });
     } else {
-      console.warn("[Typing] ⚠️ STOMP client chưa sẵn sàng hoặc mất kết nối:", client);
+      console.warn(
+        "[Typing] ⚠️ STOMP client chưa sẵn sàng hoặc mất kết nối:",
+        client,
+      );
     }
   },
 
@@ -73,7 +85,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const response = await conversationService.getMyConversations();
 
       if (response.data?.content) {
-        set({ conversations: response.data.content });
+        set({ conversations: sortConversationsList(response.data.content) });
       }
     } catch (error) {
       console.error("Lỗi xảy ra khi tải danh sách hội thoại: ", error);
@@ -138,7 +150,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
               ...state.messages,
               [conversationId]: [...currentMsgs, newMsg],
             },
-            conversations: updatedConversations,
+            // Sắp xếp lại danh sách để cuộc trò chuyện vừa nhắn nhảy lên đầu
+            conversations: sortConversationsList(updatedConversations),
           };
         });
       }
@@ -193,19 +206,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
         get().fetchConversations(); //tải lại danh sách
       }
 
-      // Sắp xếp lại danh sách: cuộc trò chuyện có tin nhắn mới nhất lên trên cùng
-      updatedConversations.sort((a, b) => {
-        const timeA = a.lastMessageTime
-          ? new Date(a.lastMessageTime).getTime()
-          : 0;
-        const timeB = b.lastMessageTime
-          ? new Date(b.lastMessageTime).getTime()
-          : 0;
-        return timeB - timeA;
-      });
       return {
         messages: updatedMessages,
-        conversations: updatedConversations,
+        conversations: sortConversationsList(updatedConversations),
       };
     });
   },
