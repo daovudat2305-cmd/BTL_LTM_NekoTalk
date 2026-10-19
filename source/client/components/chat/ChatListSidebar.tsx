@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function ChatListSidebar() {
   const { conversations, fetchConversations, loadingConversations } =
@@ -135,10 +136,18 @@ export default function ChatListSidebar() {
                       onClick={() => handleStartChat(user.userId)}
                       className="p-3 flex items-center gap-3 hover:bg-gray-100 cursor-pointer rounded-md"
                     >
-                      <div className="w-10 h-10 rounded-full bg-pink-200 flex items-center justify-center font-bold text-pink-600">
-                        {user.username.charAt(0).toUpperCase()}
+                      <Avatar size="lg">
+                        <AvatarImage src={user.avatarUrl} alt={user.username} />
+                        <AvatarFallback className="bg-pink-200 font-bold text-pink-600">
+                          {user.username?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sm">{user.username}</span>
+                        {user.email && (
+                          <span className="text-xs text-muted-foreground">{user.email}</span>
+                        )}
                       </div>
-                      <span>{user.username}</span>
                     </div>
                   ))}
                 </div>

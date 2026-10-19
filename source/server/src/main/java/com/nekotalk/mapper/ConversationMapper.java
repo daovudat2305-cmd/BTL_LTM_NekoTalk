@@ -34,7 +34,10 @@ public final class ConversationMapper {
                     .stream()
                     .filter(participants -> !participants.getUser().getId().equals(creatorId))
                     .findFirst()
-                    .ifPresent(participantInfo -> response.setName(participantInfo.getUser().getUsername()));
+                    .ifPresent(participantInfo -> {
+                        response.setName(participantInfo.getUser().getUsername());
+                        response.setConversationAvatar(participantInfo.getUser().getAvatarUrl());
+                    });
         } else {
             // Với GROUP: dùng tên nhóm và avatar từ conversation
             response.setName(conversation.getName());
@@ -66,13 +69,10 @@ public final class ConversationMapper {
                 .build();
 
         String name = resolveConversationName(creatorId, conversation);
+        String avatar = resolveConversationAvatar(creatorId, conversation);
 
         response.setName(name);
-
-        // set conversation avatar
-        if (conversationType == ConversationType.GROUP) {
-            response.setConversationAvatar(conversation.getConversationAvatar());
-        }
+        response.setConversationAvatar(avatar);
 
         return response;
     }
@@ -89,5 +89,17 @@ public final class ConversationMapper {
                     .orElse(null);
         }
         return conversation.getName();
+    }
+
+    private static String resolveConversationAvatar(String currentUserId, Conversation conversation) {
+        if(conversation.getConversationType() == ConversationType.PRIVATE) {
+            return conversation.getParticipants()
+                .stream()
+                .filter(p -> !p.getUser().getId().equals(currentUserId))
+                .findFirst()
+                .map(p -> p.getUser().getAvatarUrl())
+                .orElse(null);
+        }
+        return conversation.getConversationAvatar();
     }
 }

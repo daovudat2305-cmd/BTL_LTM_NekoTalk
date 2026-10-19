@@ -42,6 +42,7 @@ export interface ChatMessageResponse {
   conversationAvatar: string | null;
   senderId: string;
   senderName: string;
+  senderAvatar?: string | null;
   content: string;
   messageType: MessageType;
   messageMedia: MessageMediaResponse[] | null;

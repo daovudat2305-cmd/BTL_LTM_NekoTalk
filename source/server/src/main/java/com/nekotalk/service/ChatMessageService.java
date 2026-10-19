@@ -92,6 +92,7 @@ public class ChatMessageService {
                                 .conversationAvatar(message.getConversation().getConversationAvatar())
                                 .senderId(sender.getId())
                                 .senderName(sender.getUsername())
+                                .senderAvatar(sender.getAvatarUrl())
                                 .content(message.getContent())
                                 .messageType(message.getMessageType())
                                 .messageMedia(message.getMediaFiles().stream()
@@ -139,6 +140,7 @@ public class ChatMessageService {
                                                 .conversationAvatar(conversation.getConversationAvatar())
                                                 .senderId(message.getSender().getId())
                                                 .senderName(message.getSender().getUsername())
+                                                .senderAvatar(message.getSender().getAvatarUrl())
                                                 .content(message.getContent())
                                                 .messageType(message.getMessageType())
                                                 // map media files

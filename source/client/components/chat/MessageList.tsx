@@ -4,14 +4,18 @@ import { useChatStore } from "@/store/useChatStore";
 import { useUserStore } from "@/store/useUserStore";
 import { useEffect, useRef } from "react";
 import TypingIndicator from "./TypingIndicator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ConversationType } from "@/types";
 
 const EMPTY_TYPING_USERS: string[] = [];
 
 export default function MessageList({ chatId }: { chatId: string }) {
-  const { fetchMessages, messages, loadingMessages } = useChatStore();
+  const { fetchMessages, messages, loadingMessages, conversations } =
+    useChatStore();
   const currentUser = useUserStore((s) => s.user);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  const conversation = conversations.find((c) => c.id === chatId);
   const chatMessages = messages[chatId] || [];
 
   const typingUsers =
@@ -53,15 +57,27 @@ export default function MessageList({ chatId }: { chatId: string }) {
       ) : (
         chatMessages.map((msg) => {
           const isMe = msg.senderId === currentUser?.userId;
+          const avatarUrl =
+            msg.senderAvatar ||
+            (conversation?.conversationType === ConversationType.PRIVATE
+              ? conversation.conversationAvatar
+              : undefined);
+
           return (
             <div
               key={msg.id || msg.tempId}
               className={`flex gap-2 max-w-[70%] ${isMe ? "self-end" : "self-start"}`}
             >
               {!isMe && (
-                <div className="w-8 h-8 rounded-full bg-pink-100 flex-shrink-0 flex items-center justify-center text-xs font-bold text-pink-500">
-                  {msg.senderName?.charAt(0).toUpperCase()}
-                </div>
+                <Avatar className="size-8 shrink-0">
+                  <AvatarImage
+                    src={avatarUrl || undefined}
+                    alt={msg.senderName}
+                  />
+                  <AvatarFallback className="bg-pink-100 text-pink-500 text-xs font-bold">
+                    {msg.senderName?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               )}
               <div
                 className={`rounded-2xl p-3 text-[15px] ${isMe ? "bg-gradient-to-r from-rose-500 to-pink-500 text-white" : "bg-gray-100 text-black"}`}
