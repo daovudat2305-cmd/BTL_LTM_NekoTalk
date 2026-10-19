@@ -24,6 +24,7 @@ public class ChatMessageResponse {
     private String conversationAvatar;
     private String senderId;
     private String senderName;
+    private String senderAvatar;
     private String content;
     private MessageType messageType;
     private List<MessageMediaResponse> messageMedia;
