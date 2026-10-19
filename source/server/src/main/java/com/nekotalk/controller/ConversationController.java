@@ -2,12 +2,15 @@ package com.nekotalk.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.nekotalk.dto.request.CreateConversationRequest;
 import com.nekotalk.dto.response.ApiResponse;
+import com.nekotalk.dto.response.AvatarUploadResponse;
 import com.nekotalk.dto.response.ConversationDetailResponse;
 import com.nekotalk.dto.response.CreateConversationResponse;
 import com.nekotalk.dto.response.PageResponse;
+import com.nekotalk.service.CloudinaryService;
 import com.nekotalk.service.ConversationService;
 
 import jakarta.validation.Valid;
@@ -27,6 +30,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class ConversationController {
 
     private final ConversationService conversationService;
+    private final CloudinaryService cloudinaryService;
+
+    @PostMapping("/avatar")
+    public ApiResponse<AvatarUploadResponse> uploadGroupAvatar(@RequestParam("file") MultipartFile file) {
+        String avatarUrl = cloudinaryService.uploadAvatar(file);
+
+        return ApiResponse.<AvatarUploadResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Group avatar uploaded successfully")
+                .data(AvatarUploadResponse.builder().avatarUrl(avatarUrl).build())
+                .build();
+    }
 
     @PostMapping
     public ApiResponse<CreateConversationResponse> createConversation(

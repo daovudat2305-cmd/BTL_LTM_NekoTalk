@@ -5,6 +5,7 @@ import {
   PageResponse,
   ConversationDetailResponse,
   CreateConversationRequest,
+  AvatarUploadResponse,
 } from "@/types";
 
 export const conversationService = {
@@ -24,6 +25,24 @@ export const conversationService = {
     const response = await axiosClient.post<
       ApiResponse<ConversationDetailResponse>
     >(API_ENDPOINTS.CONVERSATIONS.CREATE, data);
+    return response.data;
+  },
+
+  uploadAvatar: async (
+    file: File,
+  ): Promise<ApiResponse<AvatarUploadResponse>> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await axiosClient.post<ApiResponse<AvatarUploadResponse>>(
+      API_ENDPOINTS.CONVERSATIONS.UPLOAD_AVATAR,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
     return response.data;
   },
 };
