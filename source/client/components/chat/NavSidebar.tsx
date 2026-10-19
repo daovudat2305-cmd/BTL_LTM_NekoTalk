@@ -10,36 +10,92 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useChatStore } from "@/store/useChatStore";
+import { cn } from "@/lib/utils";
 
 export default function NavSidebar() {
   const { logout } = useAuth();
+  const pathname = usePathname();
+  const lastChatId = useChatStore((s) => s.lastChatId);
+
+  const isProfile = pathname?.startsWith("/chat/profile") ?? false;
+  const isChat =
+    !isProfile &&
+    (pathname === "/chat" || (pathname?.startsWith("/chat/") ?? false));
+  const chatHref = lastChatId ? `/chat/${lastChatId}` : "/chat";
 
   return (
     <nav className="w-[60px] flex flex-col items-center justify-between border-r border-gray-200 py-4">
       {/* Nhóm Icon phía trên */}
       <div className="flex flex-col gap-6 items-center">
         {/* Neko Logo */}
-        <Image src="/logo.svg" alt="NekoTalk" width={52} height={52} />
+        <Link href={chatHref} aria-label="Trang chủ NekoTalk" title="NekoTalk">
+          <Image src="/logo.svg" alt="NekoTalk" width={52} height={52} priority />
+        </Link>
         
         {/* Các Icon chức năng */}
         <div className="flex flex-col gap-1.5 items-center">
-          <Button variant="ghost" size="icon" className="w-12 h-12 rounded-xl text-black hover:bg-gray-200">
-            <MessageCircle size={28} />
-          </Button>
-          <Button variant="ghost" size="icon" className="w-12 h-12 rounded-xl text-gray-500 hover:bg-gray-100">
-            <Users size={28} />
-          </Button>
-          <Button variant="ghost" size="icon" className="w-12 h-12 rounded-xl text-gray-500 hover:bg-gray-100">
-            <Settings size={28} />
-          </Button>
-          {/* Mở trang hồ sơ chỉ đọc của tài khoản đang đăng nhập. */}
-          <Link href="/chat/profile" aria-label="Thông tin người dùng" title="Thông tin người dùng">
+          {/* Nút chuyển về đoạn chat */}
+          <Link
+            href={isProfile ? chatHref : "/chat"}
+            aria-label="Đoạn chat"
+            title="Đoạn chat"
+          >
             <Button
               variant="ghost"
               size="icon"
-              className="w-12 h-12 rounded-xl text-gray-500 hover:bg-gray-100"
+              className={cn(
+                "w-12 h-12 rounded-xl transition",
+                isChat
+                  ? "text-black bg-gray-200 hover:bg-gray-200"
+                  : "text-gray-500 hover:bg-gray-100",
+              )}
+              aria-label="Đoạn chat"
+            >
+              <MessageCircle size={28} />
+            </Button>
+          </Link>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-12 h-12 rounded-xl text-gray-500 hover:bg-gray-100"
+            aria-label="Danh bạ"
+            title="Danh bạ"
+          >
+            <Users size={28} />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-12 h-12 rounded-xl text-gray-500 hover:bg-gray-100"
+            aria-label="Cài đặt"
+            title="Cài đặt"
+          >
+            <Settings size={28} />
+          </Button>
+
+          {/* Mở hoặc đóng trang hồ sơ của tài khoản đang đăng nhập. Bấm khi đang ở profile sẽ quay lại chat. */}
+          <Link
+            href={isProfile ? chatHref : "/chat/profile"}
+            aria-label={
+              isProfile ? "Quay lại đoạn chat" : "Thông tin người dùng"
+            }
+            title={isProfile ? "Quay lại đoạn chat" : "Thông tin người dùng"}
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "w-12 h-12 rounded-xl transition",
+                isProfile
+                  ? "text-black bg-gray-200 hover:bg-gray-200"
+                  : "text-gray-500 hover:bg-gray-100",
+              )}
               aria-label="Thông tin người dùng"
             >
               <CircleUser size={28} />

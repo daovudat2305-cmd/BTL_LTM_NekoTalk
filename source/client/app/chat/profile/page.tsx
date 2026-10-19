@@ -8,10 +8,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { authService } from "@/services/auth.service";
 import { useUserStore } from "@/store/useUserStore";
+import { useChatStore } from "@/store/useChatStore";
 import { UserDetailResponse } from "@/types";
 import { userService } from "@/services/user.service";
 
 export default function ProfilePage() {
+  const lastChatId = useChatStore((state) => state.lastChatId);
+  const chatHref = lastChatId ? `/chat/${lastChatId}` : "/chat";
   const storedUser = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
   const [user, setProfileUser] = useState<UserDetailResponse | null>(
@@ -112,7 +115,7 @@ export default function ProfilePage() {
     <section className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-gray-50">
       <header className="flex items-center gap-3 border-b border-gray-200 bg-white px-6 py-4">
         <Link
-          href="/chat"
+          href={chatHref}
           aria-label="Quay lại đoạn chat"
           title="Quay lại đoạn chat"
         >

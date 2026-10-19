@@ -1,7 +1,15 @@
-// Import giao diện "EmptyState" bạn đã tạo
+"use client";
+
+import { useEffect } from "react";
 import EmptyState from "@/components/chat/EmptyState";
+import { useChatStore } from "@/store/useChatStore";
 
 export default function ChatIndexPage() {
-  // Đơn giản chỉ cần gọi Component EmptyState ra
+  const setLastChatId = useChatStore((s) => s.setLastChatId);
+
+  useEffect(() => {
+    setLastChatId(null);
+  }, [setLastChatId]);
+
   return <EmptyState />;
 }
