@@ -10,6 +10,7 @@ export interface ChatItemData {
   time?: string | null;
   isMuted?: boolean;
   hasUnread?: boolean;
+  isOnline?: boolean;
 }
 
 export default function ChatItem({ data }: { data: ChatItemData }) {
@@ -32,12 +33,17 @@ export default function ChatItem({ data }: { data: ChatItemData }) {
         hasUnread ? "bg-rose-50/40 dark:bg-rose-950/20" : ""
       }`}
     >
-      <Avatar size="lg" className="border border-border shrink-0">
-        <AvatarImage src={data.avatarUrl} alt={data.name} />
-        <AvatarFallback className="bg-pink-100 text-pink-700 font-semibold text-xs">
-          {initials}
-        </AvatarFallback>
-      </Avatar>
+      <div className="relative shrink-0">
+        <Avatar size="lg" className="border border-border">
+          <AvatarImage src={data.avatarUrl} alt={data.name} />
+          <AvatarFallback className="bg-pink-100 text-pink-700 font-semibold text-xs">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
+        {data.isOnline && (
+          <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-gray-950 shadow-xs" />
+        )}
+      </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0">

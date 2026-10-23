@@ -42,6 +42,7 @@ public class ConversationService {
     private final UserRepository userRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final ConversationParticipantRepository participantRepository;
+    private final UserPresenceService presenceService;
 
     public CreateConversationResponse createConversation(String creatorId, CreateConversationRequest request) {
         List<String> participantIds = request.participantIds();
@@ -133,7 +134,22 @@ public class ConversationService {
         List<ConversationDetailResponse> responses = conversationIds.stream()
                 .map(conversationMap::get)
                 .filter(Objects::nonNull)
-                .map(conversation -> ConversationMapper.toConversationDetailResponse(userId, conversation))
+                .map(conversation -> {
+                    ConversationDetailResponse res = ConversationMapper.toConversationDetailResponse(userId, conversation);
+
+                    // Nếu là chat 1-1, kiểm tra người bạn chat có đang online không
+                    if (conversation.getConversationType() == ConversationType.PRIVATE) {
+                        conversation.getParticipants().stream()
+                            .filter(p -> !p.getUser().getId().equals(userId))
+                            .findFirst()
+                            .ifPresent(partner -> {
+                                String partnerId = partner.getUser().getId();
+                                res.setIsOnline(presenceService.isUserOnline(partnerId));
+                                res.setLastOnlineAt(presenceService.getLastActiveAt(partnerId));
+                            });
+                    }
+                    return res;
+                })
                 .toList();
 
         return PageResponse.<ConversationDetailResponse>builder()

@@ -2,12 +2,14 @@ import { create } from "zustand";
 import { Client } from "@stomp/stompjs";
 import {
   ConversationDetailResponse,
+  ConversationType,
   ChatMessageResponse,
   MessageType,
 } from "@/types";
 import { conversationService } from "@/services/conversation.service";
 import { messageService } from "@/services/message.service";
 import { parseDate } from "@/lib/date";
+import { useUserStore } from "./useUserStore";
 
 // Map lưu timer tự động hủy trạng thái typing cho từng user trong từng phòng chat
 const typingTimeouts = new Map<string, NodeJS.Timeout>();
@@ -29,6 +31,7 @@ interface ChatState {
   loadingMessages: boolean;
   sending: boolean;
   typingUsers: Record<string, string[]>;
+  onlineUsers: Record<string, { isOnline: boolean; lastOnlineAt: string | null }>;
   stompClient: Client | null;
 
   lastChatId: string | null;
@@ -49,6 +52,11 @@ interface ChatState {
   ) => void;
   sendTyping: (conversationId: string, isTyping: boolean) => void;
   markConversationAsRead: (conversationId: string) => Promise<void>;
+  updateUserPresence: (
+    userId: string,
+    isOnline: boolean,
+    lastOnlineAt: string | null,
+  ) => void;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -59,6 +67,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   loadingMessages: false,
   sending: false,
   typingUsers: {},
+  onlineUsers: {},
   stompClient: null,
   lastChatId: null,
 
@@ -133,7 +142,26 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const response = await conversationService.getMyConversations();
 
       if (response.data?.content) {
-        set({ conversations: sortConversationsList(response.data.content) });
+        const convs = response.data.content;
+        const currentUserId = useUserStore.getState().user?.userId;
+        const initialOnlineUsers = { ...get().onlineUsers };
+
+        convs.forEach((c) => {
+          if (c.conversationType === ConversationType.PRIVATE && c.participantInfo) {
+            const partner = c.participantInfo.find((p) => p.userId !== currentUserId);
+            if (partner && c.isOnline !== undefined) {
+              initialOnlineUsers[partner.userId] = {
+                isOnline: Boolean(c.isOnline),
+                lastOnlineAt: c.lastOnlineAt || null,
+              };
+            }
+          }
+        });
+
+        set({
+          conversations: sortConversationsList(convs),
+          onlineUsers: initialOnlineUsers,
+        });
       }
     } catch (error) {
       console.error("Lỗi xảy ra khi tải danh sách hội thoại: ", error);
@@ -306,6 +334,34 @@ export const useChatStore = create<ChatState>((set, get) => ({
           ...state.typingUsers,
           [conversationId]: updatedList,
         },
+      };
+    });
+  },
+
+  updateUserPresence: (userId, isOnline, lastOnlineAt) => {
+    set((state) => {
+      const updatedOnlineUsers = {
+        ...state.onlineUsers,
+        [userId]: { isOnline, lastOnlineAt },
+      };
+
+      const updatedConversations = state.conversations.map((c) => {
+        if (
+          c.conversationType === ConversationType.PRIVATE &&
+          c.participantInfo?.some((p) => p.userId === userId)
+        ) {
+          return {
+            ...c,
+            isOnline,
+            lastOnlineAt: isOnline ? null : lastOnlineAt || c.lastOnlineAt,
+          };
+        }
+        return c;
+      });
+
+      return {
+        onlineUsers: updatedOnlineUsers,
+        conversations: updatedConversations,
       };
     });
   },

@@ -7,6 +7,7 @@ import {
   ConversationType,
   TypingNotification,
   ReadReceiptNotification,
+  PresenceEvent,
 } from "@/types";
 import { toast } from "sonner";
 
@@ -102,6 +103,21 @@ export const useWebSocket = () => {
             }
           } catch (err) {
             console.error("[WebSocket] Lỗi parse read-receipt frame:", err);
+          }
+        });
+
+        // Lắng nghe sự kiện thay đổi trạng thái online/offline (Presence)
+        client.subscribe("/topic/presence", (message: IMessage) => {
+          try {
+            if (message.body) {
+              const presence: PresenceEvent = JSON.parse(message.body);
+              console.log("[Presence] 🟢 Nhận cập nhật trạng thái từ server:", presence);
+              useChatStore
+                .getState()
+                .updateUserPresence(presence.userId, presence.isOnline, presence.lastOnlineAt);
+            }
+          } catch (err) {
+            console.error("[WebSocket] Lỗi parse presence frame:", err);
           }
         });
       },

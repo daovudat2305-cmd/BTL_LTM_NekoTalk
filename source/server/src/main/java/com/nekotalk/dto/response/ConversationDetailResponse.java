@@ -32,4 +32,7 @@ public class ConversationDetailResponse {
 
     private Boolean hasUnread;
     private String lastMessageSenderId;
+
+    private Boolean isOnline;
+    private LocalDateTime lastOnlineAt;
 }

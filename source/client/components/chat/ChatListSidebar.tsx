@@ -38,8 +38,13 @@ const normalizeSearchText = (text: string): string => {
 };
 
 export default function ChatListSidebar() {
-  const { conversations, fetchConversations, loadingConversations, setLastChatId } =
-    useChatStore();
+  const {
+    conversations,
+    fetchConversations,
+    loadingConversations,
+    setLastChatId,
+    onlineUsers,
+  } = useChatStore();
   const currentUser = useUserStore((s) => s.user);
   const params = useParams();
   const currentChatId = params?.chatId as string;
@@ -385,6 +390,19 @@ export default function ChatListSidebar() {
 
               const isActive = currentChatId === chat.id;
 
+              // Xác định trạng thái online cho chat 1-1
+              let isOnline = false;
+              if (chat.conversationType === ConversationType.PRIVATE) {
+                const partner = chat.participantInfo?.find(
+                  (p) => !currentUser?.userId || p.userId !== currentUser.userId,
+                );
+                if (partner && onlineUsers[partner.userId] !== undefined) {
+                  isOnline = onlineUsers[partner.userId].isOnline;
+                } else {
+                  isOnline = Boolean(chat.isOnline);
+                }
+              }
+
               return (
                 <Link href={`/chat/${chat.id}`} key={chat.id} className="block">
                   <div
@@ -398,6 +416,7 @@ export default function ChatListSidebar() {
                         avatarUrl: avatarUrl,
                         time: chat.lastMessageTime,
                         hasUnread: chat.hasUnread && !isActive,
+                        isOnline: isOnline,
                       }}
                     />
                   </div>
