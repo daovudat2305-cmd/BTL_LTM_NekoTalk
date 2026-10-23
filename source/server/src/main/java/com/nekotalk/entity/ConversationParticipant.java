@@ -31,4 +31,7 @@ public class ConversationParticipant {
     @Column(name = "joined_at", nullable = false)
     @Builder.Default
     LocalDateTime joinedAt = LocalDateTime.now();
+
+    @Column(name = "last_read_at")
+    LocalDateTime lastReadAt;
 }

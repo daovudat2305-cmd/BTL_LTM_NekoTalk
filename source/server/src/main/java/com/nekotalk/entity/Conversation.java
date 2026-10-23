@@ -42,10 +42,9 @@ public class Conversation {
 
     LocalDateTime createdAt;
 
+    String lastMessageSenderId;
     String lastMessageId;
-
     String lastMessageContent;
-
     LocalDateTime lastMessageTime;
 
     public void addParticipant(User user) {

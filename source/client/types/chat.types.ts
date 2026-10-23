@@ -27,6 +27,8 @@ export interface ConversationDetailResponse {
   createdAt: string | null;
   isOnline: boolean;
   lastOnlineAt: string | null;
+  hasUnread?: boolean;
+  lastMessageSenderId?: string;
 }
 
 export interface MessageMediaResponse {
@@ -80,4 +82,11 @@ export interface TypingNotification {
   userId: string;
   username: string;
   isTyping: boolean;
+}
+
+export interface ReadReceiptNotification {
+  conversationId: string;
+  readerId: string;
+  readerName: string;
+  readAt: string;
 }

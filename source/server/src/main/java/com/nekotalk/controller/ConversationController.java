@@ -22,6 +22,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
@@ -69,6 +71,19 @@ public class ConversationController {
                 .code(HttpStatus.OK.value())
                 .message("My conversation retrieved successfully")
                 .data(data)
+                .build();
+    }
+
+    @PatchMapping("/{conversationId}/read")
+    public ApiResponse<Void> markAsRead(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable String conversationId) {
+        String userId = jwt.getSubject();
+        conversationService.markConversationAsRead(userId, conversationId);
+
+        return ApiResponse.<Void>builder()
+                .code(HttpStatus.OK.value())
+                .message("Marked conversation as read")
                 .build();
     }
 

@@ -29,4 +29,7 @@ public class ConversationDetailResponse {
     private LocalDateTime lastMessageTime;
 
     private LocalDateTime createdAt;
+
+    private Boolean hasUnread;
+    private String lastMessageSenderId;
 }

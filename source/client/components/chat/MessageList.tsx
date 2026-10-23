@@ -27,12 +27,15 @@ export default function MessageList({ chatId }: { chatId: string }) {
   const typingUsers =
     useChatStore((s) => s.typingUsers[chatId]) ?? EMPTY_TYPING_USERS;
 
-  //tải tin nhắn khi mở phòng chat
+  const markConversationAsRead = useChatStore((s) => s.markConversationAsRead);
+
+  //tải tin nhắn khi mở phòng chat & đánh dấu đã đọc
   useEffect(() => {
     if (chatId) {
       fetchMessages(chatId);
+      markConversationAsRead(chatId);
     }
-  }, [chatId, fetchMessages]);
+  }, [chatId, fetchMessages, markConversationAsRead]);
 
   //cuộn xuống khi có tin nhắn mới
   useEffect(() => {

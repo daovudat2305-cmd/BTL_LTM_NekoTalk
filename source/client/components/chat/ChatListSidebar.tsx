@@ -397,6 +397,7 @@ export default function ChatListSidebar() {
                         message: lastMsg,
                         avatarUrl: avatarUrl,
                         time: chat.lastMessageTime,
+                        hasUnread: chat.hasUnread && !isActive,
                       }}
                     />
                   </div>

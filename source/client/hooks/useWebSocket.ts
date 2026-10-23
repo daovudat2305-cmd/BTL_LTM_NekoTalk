@@ -6,6 +6,7 @@ import {
   ConversationDetailResponse,
   ConversationType,
   TypingNotification,
+  ReadReceiptNotification,
 } from "@/types";
 import { toast } from "sonner";
 
@@ -89,6 +90,18 @@ export const useWebSocket = () => {
             }
           } catch (err) {
             console.error("[WebSocket] Lỗi parse typing frame:", err);
+          }
+        });
+
+        // Lắng nghe thông báo đối phương đã đọc tin nhắn
+        client.subscribe("/user/queue/read-receipts", (message: IMessage) => {
+          try {
+            if (message.body) {
+              const receipt: ReadReceiptNotification = JSON.parse(message.body);
+              console.log("[ReadReceipt] 📥 Nhận thông báo đã đọc từ server:", receipt);
+            }
+          } catch (err) {
+            console.error("[WebSocket] Lỗi parse read-receipt frame:", err);
           }
         });
       },

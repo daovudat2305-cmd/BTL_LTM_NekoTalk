@@ -12,17 +12,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.nekotalk.common.ConversationType;
 import com.nekotalk.dto.request.CreateConversationRequest;
 import com.nekotalk.dto.response.ConversationDetailResponse;
 import com.nekotalk.dto.response.CreateConversationResponse;
 import com.nekotalk.dto.response.PageResponse;
+import com.nekotalk.dto.response.ReadReceiptResponse;
 import com.nekotalk.entity.Conversation;
 import com.nekotalk.entity.User;
 import com.nekotalk.exception.AppException;
 import com.nekotalk.exception.ErrorCode;
 import com.nekotalk.mapper.ConversationMapper;
+import com.nekotalk.repository.ConversationParticipantRepository;
 import com.nekotalk.repository.ConversationRepository;
 import com.nekotalk.repository.UserRepository;
 
@@ -38,6 +41,7 @@ public class ConversationService {
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final ConversationParticipantRepository participantRepository;
 
     public CreateConversationResponse createConversation(String creatorId, CreateConversationRequest request) {
         List<String> participantIds = request.participantIds();
@@ -139,5 +143,33 @@ public class ConversationService {
                 .totalElements(conversationPage.getTotalElements())
                 .content(responses)
                 .build();
+    }
+
+    @Transactional
+    public void markConversationAsRead(String userId, String conversationId) {
+        LocalDateTime now = LocalDateTime.now();
+
+        participantRepository.updateLastReadAt(conversationId, userId, now);
+
+        List<String> otherMemberIds = conversationRepository.findParticipantIdsByConversationIdAndSenderId(conversationId, userId);
+
+        User currentUser = userRepository.findById(userId).orElse(null);
+        String username = currentUser != null ? currentUser.getUsername() : "Ai đó";
+
+        ReadReceiptResponse receipt = ReadReceiptResponse.builder()
+            .conversationId(conversationId)
+            .readerId(userId)
+            .readerName(username)
+            .readAt(now)
+            .build();
+
+        //bắn socket thông báo
+        for(String memberId : otherMemberIds) {
+            try {
+                simpMessagingTemplate.convertAndSendToUser(memberId, "/queue/read-receipts", receipt);
+            } catch (Exception e) {
+                log.error("Failed to push read receipt to {}: {}", memberId, e.getMessage());
+            }
+        }
     }
 }

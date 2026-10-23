@@ -76,6 +76,7 @@ public class ChatMessageService {
                 chatMessageRepository.save(message);
 
                 // 6. Update lastMessage của conversation
+                conversation.setLastMessageSenderId(senderId);
                 conversation.setLastMessageId(message.getId());
                 conversation.setLastMessageContent(message.getContent());
                 conversation.setLastMessageTime(message.getSentAt());
