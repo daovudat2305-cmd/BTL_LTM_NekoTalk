@@ -182,3 +182,36 @@ export function isDifferentDay(
     da.getFullYear() !== db.getFullYear()
   );
 }
+
+/**
+ * Format user presence / last active timestamp.
+ * - Under 1 min: "Vừa mới truy cập"
+ * - Under 60 mins: "Hoạt động X phút trước"
+ * - Under 24 hours: "Hoạt động X giờ trước"
+ * - Yesterday: "Hoạt động hôm qua"
+ * - Older: "Hoạt động dd/MM"
+ */
+export function formatLastActive(
+  dateInput: string | Date | number | null | undefined
+): string {
+  const d = parseDate(dateInput);
+  if (!d) return "Không hoạt động";
+
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  if (diffMs < 0) return "Vừa mới truy cập";
+
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+
+  if (diffMin < 1) return "Vừa mới truy cập";
+  if (diffMin < 60) return `Hoạt động ${diffMin} phút trước`;
+  if (diffHour < 24) return `Hoạt động ${diffHour} giờ trước`;
+  if (diffDay === 1) return "Hoạt động hôm qua";
+
+  const day = d.getDate().toString().padStart(2, "0");
+  const month = (d.getMonth() + 1).toString().padStart(2, "0");
+  return `Hoạt động ${day}/${month}`;
+}

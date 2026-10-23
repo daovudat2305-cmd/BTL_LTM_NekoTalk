@@ -1,5 +1,6 @@
 package com.nekotalk.entity;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -38,6 +39,9 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     List<UserHasRole> userHasRoles = new ArrayList<>();
+
+    @Column(name = "last_active_at")
+    LocalDateTime lastActiveAt;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
