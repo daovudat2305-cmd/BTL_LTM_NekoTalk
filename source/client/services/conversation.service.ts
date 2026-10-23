@@ -45,4 +45,11 @@ export const conversationService = {
     );
     return response.data;
   },
+
+  markAsRead: async (conversationId: string): Promise<ApiResponse<void>> => {
+    const response = await axiosClient.patch<ApiResponse<void>>(
+      API_ENDPOINTS.CONVERSATIONS.MARK_AS_READ(conversationId),
+    );
+    return response.data;
+  },
 };

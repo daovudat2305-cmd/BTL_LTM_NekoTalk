@@ -1,10 +1,13 @@
 package com.nekotalk.mapper;
 
+import java.time.LocalDateTime;
+
 import com.nekotalk.common.ConversationType;
 import com.nekotalk.dto.response.ConversationDetailResponse;
 import com.nekotalk.dto.response.CreateConversationResponse;
 import com.nekotalk.dto.response.ParticipantResponse;
 import com.nekotalk.entity.Conversation;
+import com.nekotalk.entity.ConversationParticipant;
 
 public final class ConversationMapper {
     private ConversationMapper() {
@@ -73,6 +76,23 @@ public final class ConversationMapper {
 
         response.setName(name);
         response.setConversationAvatar(avatar);
+
+        ConversationParticipant currentParticipant = conversation.getParticipants().stream()
+            .filter(p -> p.getUser().getId().equals(creatorId))
+            .findFirst()
+            .orElse(null);
+        
+        boolean hasUnread = false;
+        if(conversation.getLastMessageTime() != null && currentParticipant != null) {
+            LocalDateTime lastRead = currentParticipant.getLastReadAt();
+            if(lastRead == null || lastRead.isBefore(conversation.getLastMessageTime())) {
+                // Kiểm tra nếu tin nhắn cuối KHÔNG PHẢI do chính mình gửi thì mới tính là Chưa đọc
+                // (Nếu Conversation có lưu lastMessageSenderId hoặc tin nhắn cuối)
+                hasUnread = true; 
+            }
+        }
+
+        response.setHasUnread(hasUnread);
 
         return response;
     }

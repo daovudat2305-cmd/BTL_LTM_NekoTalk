@@ -48,6 +48,7 @@ interface ChatState {
     isTyping: boolean,
   ) => void;
   sendTyping: (conversationId: string, isTyping: boolean) => void;
+  markConversationAsRead: (conversationId: string) => Promise<void>;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -82,6 +83,25 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   setLastChatId: (id) => {
     set({ lastChatId: id });
+    if (id) {
+      get().markConversationAsRead(id);
+    }
+  },
+
+  markConversationAsRead: async (conversationId: string) => {
+    // 1. Optimistic update: xóa trạng thái hasUnread ngay lập tức trên UI
+    set((state) => ({
+      conversations: state.conversations.map((c) =>
+        c.id === conversationId ? { ...c, hasUnread: false } : c,
+      ),
+    }));
+
+    // 2. Gửi request lên server
+    try {
+      await conversationService.markAsRead(conversationId);
+    } catch (error) {
+      console.error("Lỗi khi đánh dấu cuộc trò chuyện đã đọc:", error);
+    }
   },
 
   setStompClient: (client) => {
@@ -168,6 +188,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
                 lastMessageId: newMsg.id,
                 lastMessageContent: newMsg.content,
                 lastMessageTime: newMsg.createdAt,
+                lastMessageSenderId: newMsg.senderId,
+                hasUnread: false,
               };
             }
             return c;
@@ -214,6 +236,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
         [conversationId]: [...currentMsgs, newMsg],
       };
 
+      const isCurrentlyActive = get().lastChatId === conversationId;
+
       // 2. Cập nhật lastMessage và đưa cuộc trò chuyện lên đầu danh sách
       let found = false;
       const updatedConversations = state.conversations.map((c) => {
@@ -224,6 +248,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
             lastMessageId: newMsg.id,
             lastMessageContent: newMsg.content,
             lastMessageTime: newMsg.createdAt,
+            lastMessageSenderId: newMsg.senderId,
+            hasUnread: !isCurrentlyActive,
           };
         }
         return c;
@@ -232,6 +258,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
       // Nếu cuộc trò chuyện này là mới (chưa có trong sidebar):
       if (!found) {
         get().fetchConversations(); //tải lại danh sách
+      }
+
+      // Nếu đang mở cuộc trò chuyện này, tự động đánh dấu đã đọc
+      if (isCurrentlyActive) {
+        get().markConversationAsRead(conversationId);
       }
 
       return {
