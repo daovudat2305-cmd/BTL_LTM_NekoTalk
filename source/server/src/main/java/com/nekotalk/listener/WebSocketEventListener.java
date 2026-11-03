@@ -11,6 +11,7 @@ import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import com.nekotalk.dto.response.PresenceResponse;
+import com.nekotalk.service.CallService;
 import com.nekotalk.service.UserPresenceService;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class WebSocketEventListener {
 
     private final UserPresenceService presenceService;
+    private final CallService callService;
     private final SimpMessagingTemplate messagingTemplate;
 
     @EventListener
@@ -55,6 +57,7 @@ public class WebSocketEventListener {
 
         if (principal != null) {
             String userId = principal.getName();
+            callService.handleDisconnect(userId, sessionId);
 
             boolean justBecameOffline = presenceService.removeSession(userId, sessionId);
             if (justBecameOffline) {

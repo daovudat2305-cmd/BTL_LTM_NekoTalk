@@ -1,6 +1,6 @@
 "use client";
 
-import { Phone, Video, Info } from "lucide-react";
+import { Phone, Info } from "lucide-react";
 import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
 import { useChatStore } from "@/store/useChatStore";
@@ -9,10 +9,12 @@ import { ConversationType } from "@/types";
 import { formatLastActive } from "@/lib/date";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
+import { useVoiceCall } from "./VoiceCallProvider";
 
 export default function ActiveChat({ chatId }: { chatId: string }) {
   const { conversations, onlineUsers } = useChatStore();
   const currentUser = useUserStore((s) => s.user);
+  const { startVoiceCall } = useVoiceCall();
 
   // cuộc trò chuyện hiện tại
   const conversation = conversations.find((c) => c.id === chatId);
@@ -23,6 +25,7 @@ export default function ActiveChat({ chatId }: { chatId: string }) {
   let isOnline = false;
   let lastOnlineAt: string | null = null;
   let isGroup = false;
+  let partnerUserId: string | undefined;
 
   if (conversation) {
     if (conversation.conversationType === ConversationType.GROUP) {
@@ -34,6 +37,7 @@ export default function ActiveChat({ chatId }: { chatId: string }) {
         (p) => p.userId !== currentUser?.userId,
       );
       chatName = partner ? partner.username : "Người dùng";
+      partnerUserId = partner?.userId;
       avatarUrl = conversation.conversationAvatar || undefined;
 
       const partnerPresence = partner ? onlineUsers[partner.userId] : undefined;
@@ -83,16 +87,17 @@ export default function ActiveChat({ chatId }: { chatId: string }) {
           <Button
             variant="ghost"
             size="icon"
+            onClick={() => {
+              if (conversation && partnerUserId) {
+                startVoiceCall(conversation.id, partnerUserId, chatName);
+              }
+            }}
+            disabled={isGroup || !conversation || !partnerUserId}
+            aria-label="Gọi thoại"
+            title={isGroup ? "Gọi thoại 1-1" : "Gọi thoại"}
             className="w-11 h-11 hover:bg-gray-100 rounded-full transition"
           >
             <Phone size={24} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-11 h-11 hover:bg-gray-100 rounded-full transition"
-          >
-            <Video size={26} />
           </Button>
           <Button
             variant="ghost"
