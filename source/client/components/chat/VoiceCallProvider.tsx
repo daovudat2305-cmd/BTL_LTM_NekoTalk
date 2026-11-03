@@ -34,6 +34,7 @@ interface VoiceCallState {
 
 interface VoiceCallContextValue {
   startVoiceCall: (conversationId: string, peerUserId: string, peerName: string) => void;
+  startVideoCall: (conversationId: string, peerUserId: string, peerName: string) => void;
 }
 
 const VoiceCallContext = createContext<VoiceCallContextValue | null>(null);
@@ -234,6 +235,13 @@ export default function VoiceCallProvider({ children }: { children: ReactNode })
   const startVoiceCall = useCallback(
     (conversationId: string, peerUserId: string, peerName: string) => {
       initiateCall(conversationId, peerUserId, peerName, "VOICE");
+    },
+    [initiateCall],
+  );
+
+  const startVideoCall = useCallback(
+    (conversationId: string, peerUserId: string, peerName: string) => {
+      initiateCall(conversationId, peerUserId, peerName, "VIDEO");
     },
     [initiateCall],
   );
@@ -480,7 +488,7 @@ export default function VoiceCallProvider({ children }: { children: ReactNode })
   const initials = (call?.peerName || "?").slice(0, 2).toUpperCase();
 
   return (
-    <VoiceCallContext.Provider value={{ startVoiceCall }}>
+    <VoiceCallContext.Provider value={{ startVoiceCall, startVideoCall }}>
       {children}
       <audio ref={remoteAudioRef} autoPlay />
 
