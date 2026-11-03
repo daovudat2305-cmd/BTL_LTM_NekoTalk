@@ -1,6 +1,6 @@
 "use client";
 
-import { Phone, Info } from "lucide-react";
+import { Phone, Video, Info } from "lucide-react";
 import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
 import { useChatStore } from "@/store/useChatStore";
@@ -14,7 +14,7 @@ import { useVoiceCall } from "./VoiceCallProvider";
 export default function ActiveChat({ chatId }: { chatId: string }) {
   const { conversations, onlineUsers } = useChatStore();
   const currentUser = useUserStore((s) => s.user);
-  const { startVoiceCall } = useVoiceCall();
+  const { startVoiceCall, startVideoCall } = useVoiceCall();
 
   // cuộc trò chuyện hiện tại
   const conversation = conversations.find((c) => c.id === chatId);
@@ -98,6 +98,21 @@ export default function ActiveChat({ chatId }: { chatId: string }) {
             className="w-11 h-11 hover:bg-gray-100 rounded-full transition"
           >
             <Phone size={24} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              if (conversation && partnerUserId) {
+                startVideoCall(conversation.id, partnerUserId, chatName);
+              }
+            }}
+            disabled={isGroup || !conversation || !partnerUserId}
+            aria-label="Gọi video"
+            title={isGroup ? "Gọi video 1-1" : "Gọi video"}
+            className="w-11 h-11 hover:bg-gray-100 rounded-full transition"
+          >
+            <Video size={24} />
           </Button>
           <Button
             variant="ghost"
