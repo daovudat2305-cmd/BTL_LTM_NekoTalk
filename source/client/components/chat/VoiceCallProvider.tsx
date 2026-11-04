@@ -14,6 +14,7 @@ import { AlertCircle, Mic, MicOff, Phone, PhoneOff, Video, VideoOff } from "luci
 import { toast } from "sonner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { attachLocalStreamToPeer, getLocalMediaStream, ICE_CONFIGURATION, isPermissionIssue, stopMediaStream } from "@/lib/call/call-core";
 import { useChatStore } from "@/store/useChatStore";
 import type { CallSignal } from "@/types";
 
@@ -38,10 +39,6 @@ interface VoiceCallContextValue {
 }
 
 const VoiceCallContext = createContext<VoiceCallContextValue | null>(null);
-
-const ICE_CONFIGURATION: RTCConfiguration = {
-  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-};
 
 export function useVoiceCall() {
   const context = useContext(VoiceCallContext);
@@ -87,7 +84,7 @@ export default function VoiceCallProvider({ children }: { children: ReactNode })
   const closeMedia = useCallback(() => {
     peerConnectionRef.current?.close();
     peerConnectionRef.current = null;
-    localStreamRef.current?.getTracks().forEach((track) => track.stop());
+    stopMediaStream(localStreamRef.current);
     localStreamRef.current = null;
     pendingCandidatesRef.current = [];
     setLocalStream(null);
@@ -117,19 +114,14 @@ export default function VoiceCallProvider({ children }: { children: ReactNode })
     async (current: VoiceCallState) => {
       if (peerConnectionRef.current) return peerConnectionRef.current;
 
-      const constraints: MediaStreamConstraints = {
-        audio: true,
-        video: current.callType === "VIDEO",
-      };
-
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      const stream = await getLocalMediaStream(current.callType);
       localStreamRef.current = stream;
       setLocalStream(stream);
 
       const peerConnection = new RTCPeerConnection(ICE_CONFIGURATION);
       peerConnectionRef.current = peerConnection;
 
-      stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
+      attachLocalStreamToPeer(peerConnection, stream);
 
       peerConnection.ontrack = (event) => {
         const [incomingStream] = event.streams;
@@ -269,7 +261,7 @@ export default function VoiceCallProvider({ children }: { children: ReactNode })
       updateCall({
         ...current,
         phase: "error",
-        message: message.includes("Permission") || message.includes("denied")
+        message: isPermissionIssue(message)
           ? "Bạn chưa cấp quyền sử dụng micro hoặc máy ảnh."
           : "Không thể truy cập thiết bị nghe nhìn hoặc máy chủ đã ngắt kết nối.",
       });
@@ -327,6 +319,7 @@ export default function VoiceCallProvider({ children }: { children: ReactNode })
           toast.error("Nhận được tín hiệu cuộc gọi không hợp lệ.");
           return;
         }
+        if (signal.groupCall) return;
 
         const current = callRef.current;
         if (signal.type === "INVITE") {

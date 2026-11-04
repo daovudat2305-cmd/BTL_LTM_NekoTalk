@@ -9,6 +9,8 @@ public record CallSignalResponse(
         String conversationId,
         String fromUserId,
         String fromUsername,
+        String targetUserId,
+        boolean groupCall,
         String callType,
         String sdp,
         String candidate,

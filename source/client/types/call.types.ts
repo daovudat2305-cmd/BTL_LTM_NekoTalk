@@ -6,6 +6,8 @@ export type CallSignalType =
   | "OFFER"
   | "ANSWER"
   | "ICE"
+  | "JOINED"
+  | "LEFT"
   | "HANGUP"
   | "MISSED"
   | "ENDED"
@@ -19,6 +21,7 @@ export interface CallSignal {
   callId: string;
   conversationId: string;
   targetUserId?: string;
+  groupCall?: boolean;
   callType?: "VOICE" | "VIDEO";
   fromUserId?: string;
   fromUsername?: string;
