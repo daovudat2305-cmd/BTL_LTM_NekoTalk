@@ -9,12 +9,14 @@ import { ConversationType } from "@/types";
 import { formatLastActive } from "@/lib/date";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
+import { useGroupCall } from "./GroupCallProvider";
 import { useVoiceCall } from "./VoiceCallProvider";
 
 export default function ActiveChat({ chatId }: { chatId: string }) {
   const { conversations, onlineUsers } = useChatStore();
   const currentUser = useUserStore((s) => s.user);
   const { startVoiceCall, startVideoCall } = useVoiceCall();
+  const { startGroupCall } = useGroupCall();
 
   // cuộc trò chuyện hiện tại
   const conversation = conversations.find((c) => c.id === chatId);
@@ -26,6 +28,11 @@ export default function ActiveChat({ chatId }: { chatId: string }) {
   let lastOnlineAt: string | null = null;
   let isGroup = false;
   let partnerUserId: string | undefined;
+  const groupInvitees = conversation?.conversationType === ConversationType.GROUP
+    ? (conversation.participantInfo ?? [])
+        .filter((participant) => participant.userId !== currentUser?.userId)
+        .map((participant) => ({ userId: participant.userId, username: participant.username }))
+    : [];
 
   if (conversation) {
     if (conversation.conversationType === ConversationType.GROUP) {
@@ -88,13 +95,18 @@ export default function ActiveChat({ chatId }: { chatId: string }) {
             variant="ghost"
             size="icon"
             onClick={() => {
-              if (conversation && partnerUserId) {
+              if (!conversation) return;
+              if (isGroup) {
+                startGroupCall(conversation.id, groupInvitees, "VOICE");
+                return;
+              }
+              if (partnerUserId) {
                 startVoiceCall(conversation.id, partnerUserId, chatName);
               }
             }}
-            disabled={isGroup || !conversation || !partnerUserId}
-            aria-label="Gọi thoại"
-            title={isGroup ? "Gọi thoại 1-1" : "Gọi thoại"}
+            disabled={(!isGroup && (!conversation || !partnerUserId)) || (isGroup && (!conversation || groupInvitees.length === 0))}
+            aria-label={isGroup ? "Gọi thoại nhóm" : "Gọi thoại"}
+            title={isGroup ? "Gọi thoại nhóm" : "Gọi thoại"}
             className="w-11 h-11 hover:bg-gray-100 rounded-full transition"
           >
             <Phone size={24} />
@@ -103,13 +115,18 @@ export default function ActiveChat({ chatId }: { chatId: string }) {
             variant="ghost"
             size="icon"
             onClick={() => {
-              if (conversation && partnerUserId) {
+              if (!conversation) return;
+              if (isGroup) {
+                startGroupCall(conversation.id, groupInvitees, "VIDEO");
+                return;
+              }
+              if (partnerUserId) {
                 startVideoCall(conversation.id, partnerUserId, chatName);
               }
             }}
-            disabled={isGroup || !conversation || !partnerUserId}
-            aria-label="Gọi video"
-            title={isGroup ? "Gọi video 1-1" : "Gọi video"}
+            disabled={(!isGroup && (!conversation || !partnerUserId)) || (isGroup && (!conversation || groupInvitees.length === 0))}
+            aria-label={isGroup ? "Gọi video nhóm" : "Gọi video"}
+            title={isGroup ? "Gọi video nhóm" : "Gọi video"}
             className="w-11 h-11 hover:bg-gray-100 rounded-full transition"
           >
             <Video size={24} />

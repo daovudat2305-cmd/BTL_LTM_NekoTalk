@@ -27,10 +27,15 @@ public class CallService {
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final GroupCallService groupCallService;
     private final Map<String, ActiveCall> activeCalls = new ConcurrentHashMap<>();
     private final Map<String, String> userCallIds = new ConcurrentHashMap<>();
 
     public synchronized void handle(String userId, String sessionId, CallSignalRequest request) {
+        if (request != null && Boolean.TRUE.equals(request.groupCall())) {
+            groupCallService.handle(userId, sessionId, request);
+            return;
+        }
         if (request == null || request.type() == null) {
             sendError(userId, request, "Yêu cầu cuộc gọi không hợp lệ.");
             return;
@@ -54,6 +59,7 @@ public class CallService {
     }
 
     public synchronized void handleDisconnect(String userId, String sessionId) {
+        groupCallService.handleDisconnect(userId, sessionId);
         String callId = userCallIds.get(userId);
         ActiveCall call = callId == null ? null : activeCalls.get(callId);
         if (call != null && call.containsSession(sessionId)) {
@@ -213,6 +219,8 @@ public class CallService {
                 .conversationId(call.conversationId())
                 .fromUserId(fromUserId)
                 .fromUsername(sender == null ? null : sender.getUsername())
+            .targetUserId(null)
+            .groupCall(false)
                 .callType(callType)
                 .sdp(sdp)
                 .candidate(candidate)

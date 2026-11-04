@@ -9,5 +9,6 @@ public record CallSignalRequest(
         String sdp,
         String candidate,
         String sdpMid,
-        Integer sdpMLineIndex) {
+        Integer sdpMLineIndex,
+        Boolean groupCall) {
 }
