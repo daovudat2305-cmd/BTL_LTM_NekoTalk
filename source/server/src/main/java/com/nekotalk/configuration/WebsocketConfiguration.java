@@ -23,7 +23,7 @@ public class WebsocketConfiguration implements WebSocketMessageBrokerConfigurer 
         // Configure STOMP endpoint: ws://localhost:8080/ws
         // Allow frontend origin và add handshake interceptor
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:3000")
+                .setAllowedOrigins("*")
                 .addInterceptors(websocketHandshake);
     }
 
