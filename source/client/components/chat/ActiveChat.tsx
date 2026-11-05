@@ -1,6 +1,6 @@
 "use client";
 
-import { Phone, Video, Info } from "lucide-react";
+import { Phone, Video, Info, Gamepad2 } from "lucide-react";
 import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
 import { useChatStore } from "@/store/useChatStore";
@@ -11,12 +11,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { useGroupCall } from "./GroupCallProvider";
 import { useVoiceCall } from "./VoiceCallProvider";
+import { useTicTacToe } from "../game/TicTacToeProvider";
 
 export default function ActiveChat({ chatId }: { chatId: string }) {
   const { conversations, onlineUsers } = useChatStore();
   const currentUser = useUserStore((s) => s.user);
   const { startVoiceCall, startVideoCall } = useVoiceCall();
   const { startGroupCall } = useGroupCall();
+  const { inviteToGame } = useTicTacToe();
 
   // cuộc trò chuyện hiện tại
   const conversation = conversations.find((c) => c.id === chatId);
@@ -91,6 +93,25 @@ export default function ActiveChat({ chatId }: { chatId: string }) {
         </div>
 
         <div className="flex gap-1.5 [&_svg]:stroke-[url(#brand-gradient)]">
+          {/* Nút thách đấu Tic-Tac-Toe 1-1 */}
+          {!isGroup && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                if (partnerUserId) {
+                  inviteToGame(partnerUserId, chatName);
+                }
+              }}
+              disabled={!conversation || !partnerUserId}
+              aria-label="Thách đấu Tic-Tac-Toe 1-1"
+              title="Thách đấu Tic-Tac-Toe 1-1"
+              className="w-11 h-11 hover:bg-gray-100 rounded-full transition"
+            >
+              <Gamepad2 size={24} />
+            </Button>
+          )}
+
           <Button
             variant="ghost"
             size="icon"

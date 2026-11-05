@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Client, IMessage } from "@stomp/stompjs";
 import { useChatStore } from "@/store/useChatStore";
+import { useTicTacToeStore } from "@/store/useTicTacToeStore";
 import {
   ChatMessageResponse,
   ConversationDetailResponse,
@@ -118,6 +119,19 @@ export const useWebSocket = () => {
             }
           } catch (err) {
             console.error("[WebSocket] Lỗi parse presence frame:", err);
+          }
+        });
+
+        // Lắng nghe tín hiệu game Tic-Tac-Toe
+        client.subscribe("/user/queue/game.ttt", (message: IMessage) => {
+          try {
+            if (message.body) {
+              const data = JSON.parse(message.body);
+              console.log("[TicTacToe] 📥 Nhận frame từ server qua WebSocket:", data);
+              useTicTacToeStore.getState().handleServerResponse(data);
+            }
+          } catch (err) {
+            console.error("[WebSocket] Lỗi parse game frame:", err);
           }
         });
       },
