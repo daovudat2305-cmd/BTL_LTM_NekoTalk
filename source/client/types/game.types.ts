@@ -33,6 +33,12 @@ export interface TicTacToeResponse {
 
   // ERROR / DECLINED
   message?: string;
+
+  // Caro 5 ô bổ sung
+  lastMoveRow?: number | null;
+  lastMoveCol?: number | null;
+  winningCells?: [number, number][] | null;
+  boardSize?: number;
 }
 
 // Frame gửi lên server

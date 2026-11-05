@@ -3,41 +3,44 @@ import type { TicTacToeResponse, TicTacToeStatus } from "@/types/game.types";
 
 export interface TicTacToeGameState {
   gameId: string;
-  board: string[][]; // 3x3 — "X" | "O" | " "
+  board: string[][]; // ma trận kích thước boardSize x boardSize — "X" | "O" | " "
+  boardSize: number;
   currentTurnPlayerId: string;
   status: TicTacToeStatus;
   playerXId: string;
   playerXName: string;
   playerOId: string;
   playerOName: string;
+  lastMove?: { row: number; col: number } | null;
+  winningCells?: [number, number][] | null;
 }
 
-// Chuyển đổi dữ liệu board từ server (dù là char[][] dạng string[] hay string[][]) về mảng 3x3 chuẩn
-function normalizeBoard(rawBoard?: unknown): string[][] {
-  const emptyBoard: string[][] = [
-    [" ", " ", " "],
-    [" ", " ", " "],
-    [" ", " ", " "],
-  ];
-  if (!rawBoard) return emptyBoard;
+// Chuyển đổi dữ liệu board từ server (char[][] dạng string[] hoặc string[][]) về mảng kích thước chuẩn
+function normalizeBoard(rawBoard?: unknown, size = 15): string[][] {
+  const createEmptyRow = () => Array(size).fill(" ");
+  const emptyBoard: string[][] = Array.from({ length: size }, () => createEmptyRow());
 
-  if (Array.isArray(rawBoard)) {
-    return rawBoard.map((row) => {
-      if (typeof row === "string") {
-        const chars = row.split("");
-        while (chars.length < 3) chars.push(" ");
-        return chars.slice(0, 3);
-      }
-      if (Array.isArray(row)) {
-        const cells = row.map((c) => (c && String(c).trim() ? String(c) : " "));
-        while (cells.length < 3) cells.push(" ");
-        return cells.slice(0, 3);
-      }
-      return [" ", " ", " "];
-    });
+  if (!rawBoard || !Array.isArray(rawBoard)) {
+    return emptyBoard;
   }
 
-  return emptyBoard;
+  const result: string[][] = [];
+  for (let r = 0; r < size; r++) {
+    const row = rawBoard[r];
+    if (typeof row === "string") {
+      const chars = row.split("");
+      while (chars.length < size) chars.push(" ");
+      result.push(chars.slice(0, size));
+    } else if (Array.isArray(row)) {
+      const cells = row.map((c) => (c && String(c).trim() ? String(c) : " "));
+      while (cells.length < size) cells.push(" ");
+      result.push(cells.slice(0, size));
+    } else {
+      result.push(createEmptyRow());
+    }
+  }
+
+  return result;
 }
 
 interface TicTacToeStoreState {
@@ -77,21 +80,31 @@ export const useTicTacToeStore = create<TicTacToeStoreState>((set) => ({
         });
         break;
 
-      case "GAME_STATE":
+      case "GAME_STATE": {
+        const boardSize = res.boardSize ?? 15;
+        const lastMove =
+          res.lastMoveRow != null && res.lastMoveCol != null
+            ? { row: res.lastMoveRow, col: res.lastMoveCol }
+            : null;
+
         set({
           pendingInvite: null,
           game: {
             gameId: res.gameId!,
-            board: normalizeBoard(res.board),
+            board: normalizeBoard(res.board, boardSize),
+            boardSize,
             currentTurnPlayerId: res.currentTurnPlayerId!,
             status: res.status!,
             playerXId: res.playerXId!,
             playerXName: res.playerXName!,
             playerOId: res.playerOId!,
             playerOName: res.playerOName!,
+            lastMove,
+            winningCells: res.winningCells ?? null,
           },
         });
         break;
+      }
 
       case "DECLINED":
       case "ERROR":

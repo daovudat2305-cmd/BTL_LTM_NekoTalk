@@ -93,7 +93,7 @@ export default function ActiveChat({ chatId }: { chatId: string }) {
         </div>
 
         <div className="flex gap-1.5 [&_svg]:stroke-[url(#brand-gradient)]">
-          {/* Nút thách đấu Tic-Tac-Toe 1-1 */}
+          {/* Nút thách đấu Cờ Caro 1-1 */}
           {!isGroup && (
             <Button
               variant="ghost"
@@ -104,8 +104,8 @@ export default function ActiveChat({ chatId }: { chatId: string }) {
                 }
               }}
               disabled={!conversation || !partnerUserId}
-              aria-label="Thách đấu Tic-Tac-Toe 1-1"
-              title="Thách đấu Tic-Tac-Toe 1-1"
+              aria-label="Thách đấu Cờ Caro 1-1"
+              title="Thách đấu Cờ Caro 1-1 (5 ô thắng)"
               className="w-11 h-11 hover:bg-gray-100 rounded-full transition"
             >
               <Gamepad2 size={24} />
