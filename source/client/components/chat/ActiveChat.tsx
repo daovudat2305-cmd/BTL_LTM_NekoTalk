@@ -1,6 +1,6 @@
 "use client";
 
-import { Phone, Video, Info, Gamepad2 } from "lucide-react";
+import { Phone, Video, Gamepad2 } from "lucide-react";
 import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
 import { useChatStore } from "@/store/useChatStore";
@@ -151,13 +151,6 @@ export default function ActiveChat({ chatId }: { chatId: string }) {
             className="w-11 h-11 hover:bg-gray-100 rounded-full transition"
           >
             <Video size={24} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-11 h-11 hover:bg-gray-100 rounded-full transition"
-          >
-            <Info size={24} />
           </Button>
         </div>
       </header>

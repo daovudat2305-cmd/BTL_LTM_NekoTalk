@@ -2,10 +2,7 @@
 
 import {
   MessageCircle,
-  Users,
-  Settings,
   CircleUser,
-  HelpCircle,
   LogOut,
 } from "lucide-react";
 import Image from "next/image";
@@ -59,26 +56,6 @@ export default function NavSidebar() {
             </Button>
           </Link>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-12 h-12 rounded-xl text-gray-500 hover:bg-gray-100"
-            aria-label="Danh bạ"
-            title="Danh bạ"
-          >
-            <Users size={28} />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-12 h-12 rounded-xl text-gray-500 hover:bg-gray-100"
-            aria-label="Cài đặt"
-            title="Cài đặt"
-          >
-            <Settings size={28} />
-          </Button>
-
           {/* Mở hoặc đóng trang hồ sơ của tài khoản đang đăng nhập. Bấm khi đang ở profile sẽ quay lại chat. */}
           <Link
             href={isProfile ? chatHref : "/chat/profile"}
@@ -116,15 +93,6 @@ export default function NavSidebar() {
           onClick={() => void logout()}
         >
           <LogOut size={24} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="w-12 h-12 rounded-xl text-gray-500 hover:bg-gray-100"
-          aria-label="Trợ giúp"
-          title="Trợ giúp"
-        >
-          <HelpCircle size={28} />
         </Button>
       </div>
     </nav>

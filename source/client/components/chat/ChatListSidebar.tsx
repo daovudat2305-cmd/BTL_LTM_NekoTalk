@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreHorizontal, SquarePen, Search, X, Loader2 } from "lucide-react";
+import { SquarePen, Search, X, Loader2 } from "lucide-react";
 import ChatItem from "./ChatItem";
 import CreateGroupDialog from "./CreateGroupDialog";
 import Link from "next/link";
@@ -211,15 +211,6 @@ export default function ChatListSidebar() {
       <div className="flex items-center justify-between p-4">
         <h2 className="text-2xl font-bold">Đoạn chat</h2>
         <div className="flex gap-2 items-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200"
-            title="Tùy chọn khác"
-          >
-            <MoreHorizontal size={22} />
-          </Button>
-
           {/* Nút Tạo nhóm chat */}
           <CreateGroupDialog />
 
