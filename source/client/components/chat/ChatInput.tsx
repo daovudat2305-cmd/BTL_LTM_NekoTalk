@@ -2,10 +2,6 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
-  Mic,
-  Image as ImageIcon,
-  Sticker,
-  Smile,
   SendHorizonal,
   Loader2,
 } from "lucide-react";
@@ -81,35 +77,10 @@ export default function ChatInput({ chatId }: { chatId: string }) {
   };
 
   return (
-    <footer className="p-4 bg-white">
+    <footer className="p-4 bg-white border-t border-gray-100">
       <div className="flex items-center gap-2">
-        {/* Các nút đính kèm bên trái */}
-        <div className="flex gap-1 [&_svg]:stroke-[url(#brand-gradient)]">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full w-10 h-10 hover:bg-gray-100 shrink-0"
-          >
-            <Mic className="w-[22px] h-[22px]" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full w-10 h-10 hover:bg-gray-100 shrink-0"
-          >
-            <ImageIcon className="w-[22px] h-[22px]" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full w-10 h-10 hover:bg-gray-100 shrink-0"
-          >
-            <Sticker className="w-[22px] h-[22px]" />
-          </Button>
-        </div>
-
         {/* Ô nhập text */}
-        <div className="flex-1 flex items-center bg-gray-100 rounded-full px-4 py-1.5 gap-2 focus-within:ring-2 focus-within:ring-pink-500/50 transition-shadow">
+        <div className="flex-1 flex items-center bg-gray-100 rounded-full px-4 py-1.5 focus-within:ring-2 focus-within:ring-pink-500/50 transition-shadow">
           <Input
             type="text"
             placeholder="Aa"
@@ -119,13 +90,6 @@ export default function ChatInput({ chatId }: { chatId: string }) {
             className="flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 text-[17px] px-0 h-9"
             disabled={sending}
           />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full w-9 h-9 hover:bg-gray-200 shrink-0"
-          >
-            <Smile className="size-6 text-gray-500" />
-          </Button>
         </div>
 
         <Button
