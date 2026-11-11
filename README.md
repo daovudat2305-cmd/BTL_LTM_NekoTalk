@@ -1,302 +1,327 @@
 # BÀI TẬP LỚN: LẬP TRÌNH MẠNG
-
-## NekoTalk – Ứng dụng Chat Realtime
-
-> 📘 Ứng dụng chat realtime sử dụng WebSocket/STOMP, xây dựng với Spring Boot (backend), Next.js (frontend) và MySQL (database), hỗ trợ đóng gói và triển khai toàn diện bằng Docker Compose.
-
-> 📚 **Tài liệu mở rộng:**
-> - 📋 [Kế hoạch triển khai & Lộ trình nhóm (PLAN.md)](./PLAN.md) *(Tài liệu nội bộ nhóm theo dõi tiến độ)*
-> - 🎓 [Báo cáo chi tiết Công nghệ & Kiến thức LTM áp dụng (PROJECT_DETAILS.md)](./PROJECT_DETAILS.md) *(Tài liệu ôn tập & vấn đáp bảo vệ BTL)*
-
+### HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG — KHOA CÔNG NGHỆ THÔNG TIN 1
 
 ---
 
-## 🧑‍💻 THÔNG TIN NHÓM
+## 🐾 NekoTalk – Hệ Thống Giao Tiếp Thời Gian Thực & Đàm Thoại P2P
+*(Real-time Messaging & P2P Voice/Video Calling System)*
 
-| STT | Họ và Tên | MSSV | Email | Đóng góp |
-|:---:|-----------|:----:|-------|----------|
-| 1 | [Họ tên] | [MSSV] | [email] | Backend (Spring Boot, WebSocket) |
-| 2 | [Họ tên] | [MSSV] | [email] | Frontend (Next.js, UI) |
-| 3 | [Họ tên] | [MSSV] | [email] | Database, Authentication & DevOps |
+> 📘 **Giới thiệu:** NekoTalk là ứng dụng truyền thông mạng đa phương tiện kết hợp mô hình **Client-Server** (cho luồng tin nhắn, sự kiện gõ phím, trạng thái người dùng qua WebSocket/STOMP) và mô hình **Peer-to-Peer - P2P** (cho luồng đàm thoại âm thanh và hình ảnh trực tiếp qua WebRTC/UDP). Hệ thống được xây dựng với **Spring Boot (Java 21)**, **Next.js 16 (React 19)**, **MySQL 8** và được tự động hóa triển khai 100% bằng **Docker Compose**.
 
-**Tên nhóm:** [Tên nhóm]  
-**Chủ đề đã đăng ký:** Ứng dụng Chat Realtime (WebSocket)
-
----
-
-## 🧠 MÔ TẢ HỆ THỐNG
-
-Hệ thống **NekoTalk** là ứng dụng chat đa người dùng trong thời gian thực (realtime) với các tính năng: đăng ký/đăng nhập xác thực bằng JWT, tìm kiếm người dùng, tạo cuộc trò chuyện 1-1 hoặc nhóm, và trò chuyện tức thì thông qua giao thức WebSocket (STOMP).
-
-**Kiến trúc hệ thống:**
-- **Backend (Spring Boot):** Xử lý nghiệp vụ REST API, xác thực và cấp phát JWT, lưu trữ dữ liệu, broadcast tin nhắn qua WebSocket/STOMP Broker.
-- **Frontend (Next.js):** Giao diện web hiện đại (App Router, Tailwind CSS, shadcn/ui), quản lý trạng thái bằng Zustand, kết nối song song REST API (Axios) và WebSocket client (`@stomp/stompjs`).
-- **Database (MySQL 8):** Lưu trữ người dùng, cuộc hội thoại và lịch sử tin nhắn.
-- **Containerization (Docker Compose):** Đóng gói toàn bộ hệ thống (Database, Backend, Frontend) thành các containers chạy độc lập và giao tiếp qua mạng nội bộ.
-
-**Cấu trúc giao tiếp:**
-```
-[Client (Next.js)]  <--- HTTP/REST --->  [Server (Spring Boot)]  <--->  [MySQL 8]
-[Client (Next.js)]  <--- WebSocket --->  [Server (Spring Boot)]
-```
-
-**Sơ đồ hệ thống:**
-
-![System Diagram](./statics/diagram.png)
+> 📚 **Tài liệu đính kèm đồ án:**
+> - 📄 [Báo cáo tiến độ hoàn chỉnh (Word .docx)](./Báo%20cáo%20tiến%20độ%2011-11-2026.docx) *(Bản in/nộp tiến độ nhóm 2 thành viên)*
+> - 🎓 [Tài liệu Kiến trúc Chuyên sâu & Bộ câu hỏi Vấn đáp (PROJECT_DETAILS.md)](./PROJECT_DETAILS.md) *(Tài liệu ôn thi & bảo vệ BTL)*
+> - 📋 [Kế hoạch triển khai nội bộ (PLAN.md)](./PLAN.md) *(Theo dõi chi tiết các phase phát triển)*
 
 ---
 
-## ⚙️ CÔNG NGHỆ SỬ DỤNG
+## 🧑‍💻 THÔNG TIN NHÓM VÀ PHÂN CÔNG NHIỆM VỤ
 
-| Thành phần | Công nghệ | Ghi chú |
-|------------|-----------|---------|
-| **Server** | Java 21 + Spring Boot 4.1.0 | REST API + WebSocket STOMP |
-| **Database** | MySQL 8 | JPA / Hibernate (`ddl-auto: update`) |
-| **Security / Auth** | JWT (Nimbus JOSE 9.30.1) | Spring Security (Bearer Token) |
-| **Client** | TypeScript + Next.js 16.3 | React 19, App Router |
-| **UI Styling** | Tailwind CSS v4 + shadcn/ui | Theme Dark / Light |
-| **Client State** | Zustand | Quản lý state người dùng & tin nhắn |
-| **Real-time** | WebSocket + STOMP | `@stomp/stompjs` |
-| **HTTP Client** | Axios | Interceptor tự động refresh token |
-| **Containerization** | Docker & Docker Compose | Multi-stage build (Alpine Linux) |
+- **Giảng viên phụ trách:** Nguyễn Quốc Huy
+- **Học phần:** Lập trình mạng (INT1434 / IT4010)  
+- **Tên nhóm:** Nhóm NekoTalk (Nhóm 2 thành viên)  
+- **Chủ đề đăng ký:** Hệ thống giao tiếp thời gian thực & Đàm thoại P2P (WebSocket & WebRTC)
+
+### Bảng phân công chi tiết (Nhóm 2 thành viên):
+
+| STT | Họ và Tên | MSSV | Nhiệm vụ chính phụ trách | Tỷ lệ đóng góp |
+|:---:|-----------|:----:|--------------------------|:--------------:|
+| **1** | Đào Vũ Đạt | B23DCCN127 | **Backend, Network Security & Socket Server:**<br>• Thiết kế CSDL MySQL 8.0, cấu hình Spring Data JPA, đánh chỉ mục (Index) tối ưu truy vấn lịch sử chat.<br>• Bảo mật mạng: Xác thực phân tán Stateless JWT (Access/Refresh Token), Interceptor chặn bắt và xác thực WebSocket Handshake.<br>• Lập trình Socket Server: Xây dựng STOMP Message Broker (`/topic`, `/queue`), Signaling Controller cho WebRTC, TicTacToe Session Manager (Game socket).<br>• Xử lý đa luồng (Multithreading & Virtual Threads) và Event Listener bất đồng bộ. | **50%** |
+| **2** | Bùi Hồng Phong | B23DCCN641 | **Frontend, WebRTC Client & DevOps:**<br>• Xây dựng giao diện Web GUI hiện đại (Next.js 16, React 19, TypeScript, Tailwind CSS, shadcn/ui).<br>• Tích hợp mạng phía Client: Xử lý kết nối STOMP Client (nhắn tin realtime, Typing indicator, Online/Offline presence).<br>• Truyền thông P2P: Tích hợp WebRTC `RTCPeerConnection`, STUN Server, giao diện đàm thoại Voice & Video Call, xử lý MediaStream.<br>• Đóng gói và ảo hóa mạng: Viết Dockerfile đa tầng, Docker Compose kết nối 3 container qua mạng bridge nội bộ. | **50%** |
 
 ---
 
-## 🐳 TRIỂN KHAI VỚI DOCKER & DOCKER COMPOSE
+## 🧠 MÔ TẢ HỆ THỐNG VÀ KIẾN TRÚC MẠNG
 
-Dự án đã được containerize hóa hoàn chỉnh theo đúng yêu cầu kỹ thuật của bài tập lớn. Người dùng hoặc giảng viên khi clone dự án về **không cần cài đặt Java 21, Node.js hay MySQL** trên máy thật, chỉ cần duy nhất **Docker Desktop**.
+### 1. Kiến trúc phân tầng mạng (Network Architecture)
 
-### 1. Kiến trúc Container
+Hệ thống kết hợp 2 mô hình mạng kinh điển nhằm tối ưu hóa triệt để hiệu năng và băng thông:
+
+1. **Mô hình Client-Server (Quản lý nghiệp vụ & Nhắn tin thời gian thực):**
+   - **Tầng Web Service / REST API (HTTP/1.1 qua TCP):** Xử lý đăng ký, đăng nhập cấp JWT, tìm kiếm người dùng, quản lý phòng chat, tải lịch sử tin nhắn phân trang và tải tệp đính kèm.
+   - **Tầng Socket Server (WebSocket RFC 6455 + STOMP over TCP):** Duy trì kết nối 2 chiều liên tục (Full-Duplex), broadcast tin nhắn tức thì, cập nhật trạng thái đang gõ (Typing Indicator) và trạng thái trực tuyến (Presence Tracking).
+2. **Mô hình Hybrid Peer-to-Peer (Đàm thoại Âm thanh & Hình ảnh qua WebRTC):**
+   - **Signaling Server (Spring Boot):** Đóng vai trò môi giới bắt tay mạng, chuyển tiếp các gói tin SDP Offer/Answer và ICE Candidate qua kênh STOMP.
+   - **Direct P2P Media Stream (UDP / RTP / RTCP):** Sau khi hoàn tất bắt tay (Handshake & NAT Traversal qua Google STUN), 2 trình duyệt truyền tải trực tiếp luồng Audio/Video với độ trễ tính bằng mili-giây, hoàn toàn không tốn tài nguyên băng thông của máy chủ trung tâm.
 
 ```
-                    [Host Machine / Browser]
-                     │                    │
-              Port 3000 (UI)        Port 8080 (API & WS)
-                     │                    │
-    ┌────────────────▼────────────────────▼─────────────────────┐
-    │  Docker Network: nekotalk-network                         │
-    │                                                           │
-    │  ┌─────────────────┐             ┌─────────────────────┐  │
-    │  │ nekotalk-client │             │   nekotalk-server   │  │
-    │  │ (Next.js 16)    │             │ (Spring Boot / JRE) │  │
-    │  └─────────────────┘             └──────────┬──────────┘  │
-    │                                             │             │
-    │                                             │ Port 3306   │
-    │                                             ▼             │
-    │                                  ┌─────────────────────┐  │
-    │                                  │    nekotalk-mysql   │  │
-    │                                  │       (MySQL 8)     │  │
-    │                                  └──────────┬──────────┘  │
-    └─────────────────────────────────────────────┼─────────────┘
-                                                  │
-                                       ┌──────────▼──────────┐
-                                       │ Volume: mysql_data  │
-                                       └─────────────────────┘
+                    ┌────────────────────────────────────────────────────────┐
+                    │                   HỆ THỐNG NEKOTALK                    │
+                    └────────────────────────────────────────────────────────┘
+                                                │
+                 ┌──────────────────────────────┴──────────────────────────────┐
+                 ▼                                                             ▼
+     [Phân hệ Text & Presence]                                     [Phân hệ Voice & Video Call]
+     - Mô hình: Client - Server                                    - Mô hình: Hybrid P2P
+     - Giao thức: HTTP REST + WebSocket/STOMP                      - Giao thức: WebRTC (RTP/RTCP trên UDP)
+     - Kênh truyền: TCP Socket                                     - Kênh truyền: Direct UDP Stream
+     - Trung gian: Spring Boot Message Broker                      - Trung gian: Spring Boot làm Signaling Server
 ```
 
-- **`nekotalk-mysql` (MySQL 8.0):**
-  - Tự động khởi tạo database `chat_online` với mã hóa UTF-8 (`utf8mb4`).
-  - Sử dụng cơ chế **Health Check** (`mysqladmin ping`) để đảm bảo DB đã sẵn sàng 100% trước khi backend kết nối.
-  - Dữ liệu được lưu trữ bền vững qua volume `mysql_data`.
-- **`nekotalk-server` (Spring Boot Java 21):**
-  - Đóng gói bằng **Multi-stage build**: Stage 1 biên dịch Maven, Stage 2 chạy với `eclipse-temurin:21-jre-alpine` giúp tối ưu dung lượng image.
-  - Phụ thuộc (`depends_on`) vào trạng thái `healthy` của MySQL.
-- **`nekotalk-client` (Next.js 16.3):**
-  - Đóng gói bằng **Multi-stage build**: cài đặt dependencies, build production bundle và chạy với Node 20 Alpine.
+### 2. Sơ đồ tương tác các thành phần
+
+```
+┌───────────────────────┐                                     ┌───────────────────────┐
+│  Client A (Browser)   │                                     │  Client B (Browser)   │
+└──────────┬────────────┘                                     └───────────┬───────────┘
+           │                                                              │
+           │◄═══════════ REST API (HTTP 1.1) / JWT Auth ═════════════════►│
+           │                                                              │
+           │◄═══════════ Persistent WebSocket (STOMP Broker) ════════════►│
+           │               (Chat, Typing, Presence, Signaling)            │
+           │                                                              │
+           │                       ┌─────────────────┐                    │
+           │                       │  Spring Boot    │                    │
+           ├──────────────────────►│  Server (8080)  │◄───────────────────┤
+           │                       └────────┬────────┘                    │
+           │                                │                             │
+           │                                ▼                             │
+           │                       ┌─────────────────┐                    │
+           │                       │  MySQL 8 (3306) │                    │
+           │                       └─────────────────┘                    │
+           │                                                              │
+           │══════════════════════════════════════════════════════════════│
+           │   LUỒNG TRUYỀN THÔNG TRỰC TIẾP P2P (WebRTC qua giao thức UDP)│
+           │      (Audio / Video Streams - Sub-second Latency)            │
+           └──────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-### 2. Hướng dẫn khởi chạy bằng 1 lệnh duy nhất (Quick Start)
+## ⚙️ CÔNG NGHỆ VÀ KỸ THUẬT LẬP TRÌNH MẠNG ĐÃ ÁP DỤNG
 
-1. **Clone repository:**
-   ```bash
-   git clone <repository-url>
-   cd BTL_LTM_NekoTalk
-   ```
+| Thành phần | Kỹ thuật & Công nghệ áp dụng | Phiên bản | Vai trò trong hệ thống |
+|---|---|---|---|
+| **Ngôn ngữ Backend** | **Java** | 21 LTS | Xử lý nghiệp vụ, Virtual Threads tối ưu hóa đa luồng xử lý đồng thời |
+| **Backend Framework** | **Spring Boot** | 4.1.0 | Spring MVC, Spring WebSocket, Spring Security, Spring Data JPA |
+| **Giao thức Socket** | **WebSocket + STOMP** | RFC 6455 | Kênh kết nối 2 chiều liên tục trên TCP, quản lý theo Topic/Queue Broker |
+| **Đàm thoại P2P** | **WebRTC + Google STUN** | HTML5 API | Truyền tải âm thanh/hình ảnh trực tiếp qua UDP, đục lỗ mạng NAT |
+| **Xác thực mạng** | **Stateless JWT** | Nimbus JOSE | Bảo vệ REST API và chặn bắt xác thực kết nối WebSocket Handshake |
+| **Frontend Framework** | **Next.js (React)** | 16.3 / 19 | Giao diện Web GUI hiện đại, Server & Client Components |
+| **Ngôn ngữ Client** | **TypeScript** | 5.x | Đảm bảo tính toàn vẹn kiểu dữ liệu của các gói tin mạng gửi/nhận |
+| **Quản lý State GUI** | **Zustand** | 5.x | Quản lý state tin nhắn, trạng thái phòng chat và luồng gọi P2P |
+| **Cơ sở dữ liệu** | **MySQL Server** | 8.0 | Lưu trữ người dùng, hội thoại, lịch sử tin nhắn (hỗ trợ Indexing) |
+| **Media Storage** | **Cloudinary API** | REST SDK | Lưu trữ hình ảnh và tệp tin đính kèm đa phương tiện |
+| **Ảo hóa & Đóng gói** | **Docker & Docker Compose**| Multi-stage | Ảo hóa mạng nội bộ (bridge network), khởi chạy toàn bộ bằng 1 lệnh |
 
-2. **Khởi chạy toàn bộ hệ thống bằng Docker Compose:**
+---
+
+## 🐳 TRIỂN KHAI NHANH VỚI DOCKER COMPOSE (KHUYÊN DÙNG)
+
+Dự án được containerize hóa hoàn chỉnh 100%. Giảng viên và người chấm **không cần cài đặt Java 21, Node.js hay MySQL** trên máy, chỉ cần duy nhất ứng dụng **Docker Desktop**.
+
+### 1. Kiến trúc Container và Mạng ảo (Bridge Network)
+
+```
+                    [Host Machine / Trình duyệt người dùng]
+                             │                 │
+                      Port 3000 (UI)     Port 8080 (API & WS)
+                             │                 │
+    ┌────────────────────────▼─────────────────▼────────────────────────┐
+    │  Docker Network: nekotalk-network (Driver: bridge)               │
+    │                                                                   │
+    │  ┌─────────────────────────┐         ┌─────────────────────────┐  │
+    │  │     nekotalk-client     │         │     nekotalk-server     │  │
+    │  │ (Next.js 16 - Node 20)  │         │  (Spring Boot - JRE 21) │  │
+    │  └─────────────────────────┘         └────────────┬────────────┘  │
+    │                                                   │               │
+    │                                                   │ Port 3306     │
+    │                                                   ▼               │
+    │                                      ┌─────────────────────────┐  │
+    │                                      │      nekotalk-mysql     │  │
+    │                                      │     (MySQL Server 8)    │  │
+    │                                      └────────────┬────────────┘  │
+    └───────────────────────────────────────────────────┼───────────────┘
+                                                        │
+                                             ┌──────────▼──────────┐
+                                             │ Volume: mysql_data  │
+                                             └─────────────────────┘
+```
+
+- **`nekotalk-mysql`:** Tự động tạo schema `chat_online` với mã hóa UTF-8 (`utf8mb4`). Tích hợp `healthcheck` kiểm tra trạng thái sẵn sàng của DB.
+- **`nekotalk-server`:** Đóng gói Multi-stage build (Stage 1: Maven build, Stage 2: Alpine JRE 21 siêu nhẹ). Tự động chờ DB `healthy` mới khởi động.
+- **`nekotalk-client`:** Đóng gói Multi-stage build biên dịch Next.js production chạy trên Node 20 Alpine.
+
+### 2. Các bước khởi chạy 1 lệnh duy nhất:
+
+1. **Mở Docker Desktop** trên máy tính của bạn.
+2. **Mở terminal tại thư mục gốc dự án và chạy:**
    ```bash
    docker compose up -d --build
    ```
-   *(Docker sẽ tự động tải images, biên dịch Backend & Frontend, cấu hình mạng và khởi chạy 3 container).*
+   *(Docker sẽ tự động tải base images, build backend/frontend và khởi chạy 3 container).*
 
 3. **Kiểm tra trạng thái các container:**
    ```bash
    docker compose ps
    ```
-   *Khi cả 3 containers đều hiển thị trạng thái `Up` (và `mysql` ở trạng thái `healthy`) là hệ thống đã sẵn sàng.*
+   *(Khi cả 3 containers đều hiển thị trạng thái `Up` và mysql ở trạng thái `healthy` là hệ thống đã sẵn sàng).*
 
-4. **Truy cập ứng dụng:**
-   - 🌐 **Giao diện Client (Chat):** [http://localhost:3000](http://localhost:3000)
+4. **Truy cập hệ thống:**
+   - 🌐 **Giao diện Client:** [http://localhost:3000](http://localhost:3000)
    - 🔌 **Backend REST API:** [http://localhost:8080](http://localhost:8080)
-   - 🗄️ **MySQL Database (kết nối ngoài):** `localhost:3306` (User: `root`, Password: `admin`, DB: `chat_online`)
+   - 🗄️ **MySQL Database (kết nối ngoài nếu cần):** `localhost:3306` (User: `root`, Password: `admin`, DB: `chat_online`)
+
+5. **Dừng hệ thống:**
+   ```bash
+   docker compose down          # Dừng dịch vụ, giữ nguyên dữ liệu
+   docker compose down -v       # Dừng và xoá sạch dữ liệu DB để chạy lại từ đầu
+   ```
 
 ---
 
-### 3. Bảng lệnh quản lý Docker thường dùng
+## 💻 HƯỚNG DẪN CHẠY MÔI TRƯỜNG PHÁT TRIỂN (LOCAL DEV)
 
-| Thao tác | Câu lệnh |
-|---|---|
-| **Xem log realtime tất cả container** | `docker compose logs -f` |
-| **Xem log riêng của backend server** | `docker compose logs -f server` |
-| **Xem log riêng của MySQL** | `docker compose logs -f mysql` |
-| **Dừng hệ thống (giữ nguyên dữ liệu DB)** | `docker compose down` |
-| **Dừng và xoá sạch dữ liệu DB (reset từ đầu)** | `docker compose down -v` |
-| **Rebuild lại sau khi sửa code** | `docker compose up -d --build` |
-| **Khởi động lại toàn bộ containers** | `docker compose restart` |
+Dành cho các thành viên trong nhóm muốn lập trình, sửa code và debug trực tiếp qua IDE:
 
----
+### Yêu cầu môi trường:
+- Java JDK 21+
+- Node.js 20+ và npm
+- MySQL Server 8.0
 
-### 4. Xử lý sự cố thường gặp (Troubleshooting)
-
-- **Lỗi trùng cổng (`port is already allocated`):**
-  - *Nguyên nhân:* Cổng `3306`, `8080` hoặc `3000` đang bị dịch vụ khác trên máy thật chiếm dụng (ví dụ MySQL cài sẵn trên máy).
-  - *Xử lý:* Tắt service MySQL local (qua `services.msc` trên Windows) hoặc đổi cổng ánh xạ bên ngoài trong [docker-compose.yml](file:///g:/Workplace/BTL_LTM_NekoTalk/docker-compose.yml) (ví dụ `"3307:3306"`).
-- **Lỗi `Cannot connect to the Docker daemon`:**
-  - *Xử lý:* Đảm bảo ứng dụng **Docker Desktop** đã được mở và đang chạy trước khi gõ lệnh.
-
----
-
-## 💻 HƯỚNG DẪN CHẠY CỤC BỘ (LOCAL DEVELOPMENT)
-
-Nếu thành viên muốn code và debug trực tiếp trên IDE mà không cần build lại image:
-
-### Yêu cầu môi trường
-- Java 21+
-- Node.js 20+
-- MySQL 8
-
-### Bước 1: Chuẩn bị Database
-Tạo database MySQL `chat_online`:
+### Bước 1: Khởi động Database (MySQL)
+Bạn có thể tận dụng Docker để bật riêng MySQL mà không cần cài đặt phức tạp:
+```bash
+docker compose up mysql -d
+```
+Hoặc tạo database trên MySQL local:
 ```sql
 CREATE DATABASE chat_online CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
-> 💡 **Mẹo:** Bạn có thể tận dụng Docker để chạy riêng MySQL mà không cần cài MySQL trên máy:
-> ```bash
-> docker compose up mysql -d
-> ```
 
-### Bước 2: Khởi động Server (Spring Boot)
+### Bước 2: Khởi động Backend (Spring Boot)
 ```bash
 cd source/server
+# Windows:
+.\mvnw.cmd spring-boot:run
 # Linux / macOS:
 ./mvnw spring-boot:run
-# Windows:
-mvnw.cmd spring-boot:run
 ```
-Server lắng nghe tại: `http://localhost:8080`
+Server sẽ chạy tại: `http://localhost:8080`
 
-### Bước 3: Khởi động Client (Next.js)
+### Bước 3: Khởi động Frontend (Next.js)
 ```bash
 cd source/client
 npm install
 npm run dev
 ```
-Client lắng nghe tại: [http://localhost:3000](http://localhost:3000)
+Client sẽ chạy tại: [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## 🔗 GIAO TIẾP VÀ DANH SÁCH API
+## 🔗 DANH SÁCH GIAO THỨC & ENDPOINTS MẠNG
 
-### 1. HTTP / REST API (HTTP 1.1)
+### 1. HTTP / REST API Endpoints
 
-| Nhóm | Method | Endpoint | Mô tả | Auth |
+| Nhóm chức năng | Phương thức | Endpoint | Mô tả | Xác thực JWT |
 |:---:|:---:|---|---|:---:|
-| **Auth** | `POST` | `/api/users` | Đăng ký tài khoản mới | ❌ |
-| **Auth** | `POST` | `/api/auth/login` | Đăng nhập, nhận Access Token & Refresh Token | ❌ |
-| **Auth** | `POST` | `/api/auth/refresh` | Cấp mới Access Token từ Refresh Token | ❌ |
-| **User** | `GET` | `/api/users/my-info` | Lấy thông tin tài khoản hiện tại | ✅ |
-| **User** | `GET` | `/api/users/search?keyword={kw}` | Tìm kiếm người dùng theo username | ✅ |
-| **Conversation** | `POST` | `/api/conversations` | Tạo cuộc trò chuyện mới | ✅ |
-| **Conversation** | `GET` | `/api/conversations/my-conversation` | Lấy danh sách cuộc trò chuyện của tôi | ✅ |
-| **Message** | `POST` | `/api/chat-messages` | Gửi tin nhắn mới | ✅ |
-| **Message** | `GET` | `/api/chat-messages/conversations/{id}/messages` | Lấy lịch sử tin nhắn theo hội thoại (phân trang) | ✅ |
+| **Xác thực** | `POST` | `/api/users` | Đăng ký tài khoản người dùng mới | ❌ |
+| **Xác thực** | `POST` | `/api/auth/login` | Đăng nhập hệ thống, cấp Access & Refresh Token | ❌ |
+| **Xác thực** | `POST` | `/api/auth/refresh` | Cấp mới Access Token khi token cũ hết hạn | ❌ |
+| **Xác thực** | `POST` | `/api/auth/logout` | Đăng xuất, vô hiệu hóa Refresh Token hiện tại | ✅ |
+| **Người dùng** | `GET` | `/api/users/my-info` | Lấy thông tin cá nhân của tài khoản đang đăng nhập | ✅ |
+| **Người dùng** | `GET` | `/api/users/search?keyword={kw}` | Tìm kiếm tài khoản người dùng theo username | ✅ |
+| **Người dùng** | `POST` | `/api/users/avatar` | Upload ảnh đại diện cá nhân lên Cloudinary | ✅ |
+| **Hội thoại** | `POST` | `/api/conversations` | Tạo cuộc trò chuyện mới (1-1 hoặc nhóm) | ✅ |
+| **Hội thoại** | `GET` | `/api/conversations/my-conversation` | Lấy danh sách các cuộc trò chuyện của tôi | ✅ |
+| **Tin nhắn** | `POST` | `/api/chat-messages` | Gửi tin nhắn mới kèm danh sách file media | ✅ |
+| **Tin nhắn** | `GET` | `/api/chat-messages/conversations/{id}/messages` | Lấy lịch sử tin nhắn theo hội thoại (phân trang) | ✅ |
 
-### 2. WebSocket / STOMP Real-time
+### 2. WebSocket & STOMP Broker Topics / Queues
 
-| Thành phần | Đường dẫn | Mô tả |
-|---|---|---|
-| **STOMP Endpoint** | `ws://localhost:8080/ws` | Điểm kết nối WebSocket (kèm handshake interceptor xác thực JWT) |
-| **Topic Subscription** | `/topic/conversations/{conversationId}` | Kênh nhận broadcast tin nhắn realtime cho từng cuộc trò chuyện |
-| **User Queue** | `/user/queue/...` | Kênh nhận thông báo điểm-điểm (1-1) của từng người dùng |
+| Mục đích | Loại Endpoint / Kênh | Địa chỉ / Đích (Destination) | Mô tả chi tiết |
+|---|---|---|---|
+| **Handshake** | WebSocket URL | `ws://localhost:8080/ws` | Điểm bắt tay WebSocket, chặn bắt kiểm tra Token |
+| **Gửi tin nhắn** | Application Prefix | `/app/chat.send` | Client gửi tin nhắn, Server lưu DB và broadcast |
+| **Báo đang gõ** | Application Prefix | `/app/chat.typing` | Client gửi trạng thái đang gõ phím (typing event) |
+| **Bắt tay cuộc gọi** | Application Prefix | `/app/call.request`, `/app/call.accept`, `/app/call.reject` | Khởi tạo, chấp nhận hoặc từ chối cuộc gọi WebRTC |
+| **Trao đổi SDP & ICE**| Application Prefix | `/app/call.sdp`, `/app/call.ice` | Chuyển tiếp cấu hình media và ứng viên mạng P2P |
+| **Game cờ Caro** | Application Prefix | `/app/game.invite`, `/app/game.move` | Gửi lời mời và đồng bộ các nước đi cờ qua Socket |
+| **Nhận tin realtime** | User Queue | `/user/queue/messages` | Hàng đợi nhận tin nhắn cá nhân thời gian thực |
+| **Nhận tín hiệu gọi** | User Queue | `/user/queue/call.*` | Hàng đợi nhận tín hiệu chuông reo, SDP, ICE của cuộc gọi |
+| **Trạng thái Online** | Topic Broadcast | `/topic/presence` | Kênh lắng nghe trạng thái Online/Offline toàn mạng |
 
 ---
 
-## 📊 KẾT QUẢ THỰC NGHIỆM
+## 🎮 TÍNH NĂNG MỞ RỘNG ĐẶC SẮC
 
-> *(Ảnh chụp kết quả giao diện ứng dụng và hoạt động chat)*
-
-![System Screenshot](./statics/diagram.png)
+Bên cạnh các yêu cầu cơ bản của đề tài Lập trình mạng, nhóm đã nghiên cứu và phát triển thêm các tính năng nâng cao:
+1. **Đàm thoại P2P Voice & Video Call:** Ứng dụng kỹ thuật đục lỗ NAT (NAT Traversal qua Google STUN Server), truyền tải âm thanh/hình ảnh trực tiếp qua UDP/RTP với độ trễ cực thấp.
+2. **Minigame Cờ Caro (TicTacToe) Realtime:** Tích hợp trực tiếp trong phòng chat, hai người dùng có thể gửi lời mời thách đấu và chơi cờ đồng bộ theo lượt thông qua WebSocket.
+3. **Chỉ báo Typing Indicator thông minh:** Sử dụng kỹ thuật Debounce phía Client và sự kiện Socket nhẹ giúp hiển thị đối phương đang nhập văn bản mượt mà.
+4. **Theo dõi trạng thái kết nối (Presence Tracking):** Tự động phát hiện người dùng ngắt mạng thông qua bộ lắng nghe sự kiện `SessionDisconnectEvent` của Spring Boot.
 
 ---
 
-## 🧩 CẤU TRÚC DỰ ÁN
+## 🧩 CẤU TRÚC REPOSITORY (TUÂN THỦ INSTRUCTION.MD)
 
 ```
 BTL_LTM_NekoTalk/
-├── README.md                    # Tài liệu tổng quan dự án & hướng dẫn chạy
-├── INSTRUCTION.md               # Yêu cầu bài tập lớn (giữ nguyên quy định)
-├── docker-compose.yml           # Cấu hình Docker Compose (MySQL, Server, Client)
-├── statics/                     # Tài nguyên tĩnh, sơ đồ kiến trúc
-│   ├── logo.png
-│   ├── dataset_sample.csv
-│   └── diagram.png
-└── source/                      # Mã nguồn dự án
+├── README.md                          # Tài liệu chính của đồ án (file này)
+├── INSTRUCTION.md                     # File quy định của Giảng viên (KHÔNG sửa đổi)
+├── PLAN.md                            # Kế hoạch phát triển nội bộ của nhóm
+├── PROJECT_DETAILS.md                 # Báo cáo kiến trúc chi tiết & câu hỏi vấn đáp
+├── Báo cáo tiến độ 11-11-2026.docx    # File Word báo cáo tiến độ (Nhóm 2 SV)
+├── docker-compose.yml                 # File điều phối khởi chạy 3 container Docker
+├── statics/                           # Thư mục tài nguyên tĩnh
+│   ├── logo.png                       # Logo nhận diện ứng dụng
+│   ├── dataset_sample.csv             # Dữ liệu người dùng & tin nhắn mẫu
+│   └── diagram.png                    # Sơ đồ kiến trúc mạng hệ thống
+└── source/                            # Toàn bộ mã nguồn dự án
     ├── .gitignore
-    ├── client/                  # Frontend Next.js
-    │   ├── Dockerfile           # Multi-stage Docker build cho Next.js
-    │   ├── .dockerignore
-    │   ├── .env.example         # File mẫu biến môi trường
-    │   ├── README.md
-    │   ├── package.json
-    │   ├── app/                 # Next.js App Router (trang đăng nhập, chat...)
-    │   ├── components/          # Reusable UI components (shadcn/ui)
-    │   ├── hooks/               # Custom hooks (useWebSocket, ...)
-    │   ├── services/            # Axios API calls
-    │   ├── store/               # Zustand state stores
-    │   └── types/               # TypeScript interfaces
-    └── server/                  # Backend Spring Boot
-        ├── Dockerfile           # Multi-stage Docker build cho Spring Boot
-        ├── .dockerignore
-        ├── README.md
-        ├── pom.xml
-        ├── mvnw / mvnw.cmd
-        └── src/
-            └── main/
-                ├── java/com/nekotalk/
-                │   ├── configuration/   # Security, WebSocket, CORS
-                │   ├── controller/      # REST API endpoints
-                │   ├── dto/             # Request & Response DTOs
-                │   ├── entity/          # JPA Entities (User, Conversation, Message)
-                │   ├── repository/      # Spring Data Repositories
-                │   └── service/         # Business logic
-                └── resources/
-                    └── application.yml  # Cấu hình DataSource, JPA, Port, JWT
+    ├── client/                        # Frontend Web Application (Next.js 16)
+    │   ├── Dockerfile                 # Multi-stage Dockerfile cho Frontend
+    │   ├── package.json               # Danh sách thư viện phụ thuộc
+    │   ├── app/                       # Next.js App Router (Auth, Chat, Profile)
+    │   ├── components/
+    │   │   ├── auth/                  # Form đăng nhập, đăng ký
+    │   │   ├── chat/                  # Danh sách chat, khung chat, call providers
+    │   │   ├── game/                  # Giao diện bàn cờ Caro (TicTacToe)
+    │   │   └── ui/                    # Thư viện giao diện chuẩn shadcn/ui
+    │   ├── hooks/                     # Custom React Hooks (useWebSocket, useAuth)
+    │   ├── services/                  # Các lớp gọi REST API (Axios)
+    │   ├── store/                     # Quản lý State toàn cục bằng Zustand
+    │   └── types/                     # Định nghĩa TypeScript interfaces
+    └── server/                        # Backend REST & Socket Server (Spring Boot)
+        ├── Dockerfile                 # Multi-stage Dockerfile cho Backend
+        ├── pom.xml                    # Cấu hình Maven Dependencies (Java 21)
+        └── src/main/java/com/nekotalk/
+            ├── configuration/         # Cấu hình Security, JWT, WebSocket, CORS, Cloudinary
+            ├── constant/              # Các hằng số ứng dụng
+            ├── controller/            # REST Controllers & Socket MessageMapping
+            ├── dto/                   # Request & Response Data Transfer Objects
+            ├── entity/                # Các thực thể cơ sở dữ liệu JPA (MySQL)
+            ├── event/                 # Các sự kiện ứng dụng Spring nội bộ
+            ├── exception/             # Xử lý ngoại lệ toàn cục (Global Exception Handler)
+            ├── game/                  # Xử lý logic và phiên đấu cờ Caro Socket
+            ├── listener/              # Lắng nghe sự kiện kết nối/ngắt kết nối WebSocket
+            ├── repository/            # Tầng truy xuất dữ liệu Spring Data JPA
+            └── service/               # Tầng nghiệp vụ (Auth, Chat, Call, Presence, User)
 ```
 
 ---
 
-## 🧩 HƯỚNG PHÁT TRIỂN THÊM
+## 📋 TIẾN ĐỘ THỰC HIỆN DỰ ÁN
 
-- [x] Containerize toàn bộ dự án bằng Docker Compose
-- [x] Tài liệu kiến trúc chuyên sâu & bộ câu hỏi vấn đáp ([PROJECT_DETAILS.md](./PROJECT_DETAILS.md))
-- [ ] Tính năng Typing indicator & Read receipts
-- [ ] Tính năng đàm thoại âm thanh & video call WebRTC P2P (Xem [PLAN.md](./PLAN.md))
-- [ ] Triển khai lên Cloud (AWS / DigitalOcean / Railway)
-
----
-
-## 📝 GHI CHÚ
-
-- Repository tuân thủ đầy đủ cấu trúc và quy định bắt buộc theo file `INSTRUCTION.md`.
-- Dự án có thể chạy hoàn chỉnh cả ở chế độ **Docker container** hoặc **Local development**.
+- [x] **Setup & Cấu trúc:** Chuẩn hóa thư mục gốc theo `INSTRUCTION.md` (`source/client`, `source/server`, `statics/`).
+- [x] **Docker Containerization:** Đóng gói Multi-stage build cho Client và Server, điều phối qua `docker-compose.yml` với healthcheck MySQL.
+- [x] **Cơ sở dữ liệu:** Thiết kế ERD 7 bảng, đánh chỉ mục truy vấn, tích hợp JPA/Hibernate trên MySQL 8.
+- [x] **Xác thực & Bảo mật:** Đăng ký, đăng nhập cấp JWT Access/Refresh Token, bảo vệ REST API và WebSocket Handshake.
+- [x] **Nhắn tin văn bản Realtime:** Nhắn tin 1-1 và Chat nhóm qua STOMP Broker `/topic` và `/queue`.
+- [x] **Typing Indicator:** Gửi sự kiện thời gian thực khi đối phương đang gõ phím.
+- [x] **Presence Tracking:** Tự động phát hiện và broadcast trạng thái Online/Offline của người dùng.
+- [x] **Minigame Socket:** Chơi cờ Caro (TicTacToe) đồng bộ thời gian thực giữa 2 người dùng trong phòng chat.
+- [x] **Đàm thoại Voice & Video Call:** Xây dựng Signaling Server và tích hợp WebRTC P2P qua Google STUN.
+- [x] **Dataset & Tài liệu:** Cung cấp dataset mẫu `dataset_sample.csv`, tài liệu câu hỏi vấn đáp và báo cáo tiến độ Word.
+- [ ] **Kiểm thử mở rộng:** Thử nghiệm kết nối P2P trên các hạ tầng mạng đối xứng phức tạp (TURN Server) và hoàn thiện báo cáo bản in 30 trang.
 
 ---
 
 ## 📚 TÀI LIỆU THAM KHẢO
 
-- [Spring Boot Documentation](https://docs.spring.io/spring-boot/index.html)
-- [Spring WebSocket & STOMP](https://docs.spring.io/spring-framework/reference/web/websocket/stomp.html)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [STOMP Protocol Specification](https://stomp.github.io/)
-- [Docker Documentation](https://docs.docker.com/)
+1. RFC 6455 – The WebSocket Protocol: https://tools.ietf.org/html/rfc6455
+2. STOMP Protocol Specification 1.2: https://stomp.github.io/stomp-specification-1.2.html
+3. WebRTC 1.0 – Real-Time Communication Between Browsers (W3C): https://www.w3.org/TR/webrtc/
+4. Spring Framework WebSocket & STOMP Messaging: https://docs.spring.io/spring-framework/reference/web/websocket/stomp.html
+5. Next.js App Router Documentation: https://nextjs.org/docs
+6. Project Loom & Virtual Threads in Java 21: https://openjdk.org/projects/loom/
