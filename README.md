@@ -10,7 +10,7 @@
 
 > 📚 **Tài liệu đính kèm đồ án:**
 > - 📄 [Báo cáo tiến độ hoàn chỉnh (Word .docx)](./Báo%20cáo%20tiến%20độ%2011-11-2026.docx) *(Bản in/nộp tiến độ nhóm 2 thành viên)*
-> - 🎓 [Tài liệu Kiến trúc Chuyên sâu & Bộ câu hỏi Vấn đáp (PROJECT_DETAILS.md)](./PROJECT_DETAILS.md) *(Tài liệu ôn thi & bảo vệ BTL)*
+> - 🎓 [Báo cáo chi tiết giao thức mạng (NETWORK_REPORT.md)](./NETWORK_REPORT.md) *(Tài liệu kỹ thuật chuyên sâu về giao thức & kiến trúc mạng)*
 > - 📋 [Kế hoạch triển khai nội bộ (PLAN.md)](./PLAN.md) *(Theo dõi chi tiết các phase phát triển)*
 
 ---
@@ -70,15 +70,15 @@ Hệ thống kết hợp 2 mô hình mạng kinh điển nhằm tối ưu hóa t
            │◄═══════════ Persistent WebSocket (STOMP Broker) ════════════►│
            │               (Chat, Typing, Presence, Signaling)            │
            │                                                              │
-           │                       ┌─────────────────┐                    │
-           │                       │  Spring Boot    │                    │
-           ├──────────────────────►│  Server (8080)  │◄───────────────────┤
-           │                       └────────┬────────┘                    │
-           │                                │                             │
-           │                                ▼                             │
-           │                       ┌─────────────────┐                    │
-           │                       │  MySQL 8 (3306) │                    │
-           │                       └─────────────────┘                    │
+           │                       ┌─────────────────┐                   │
+           │                       │  Spring Boot    │                   │
+           ├──────────────────────►│  Server (8080)  │◄──────────────────┤
+           │                       └────────┬────────┘                   │
+           │                                │                            │
+           │                                ▼                            │
+           │                       ┌─────────────────┐                   │
+           │                       │  MySQL 8 (3306) │                   │
+           │                       └─────────────────┘                   │
            │                                                              │
            │══════════════════════════════════════════════════════════════│
            │   LUỒNG TRUYỀN THÔNG TRỰC TIẾP P2P (WebRTC qua giao thức UDP)│
@@ -102,7 +102,7 @@ Hệ thống kết hợp 2 mô hình mạng kinh điển nhằm tối ưu hóa t
 | **Quản lý State GUI** | **Zustand** | 5.x | Quản lý state tin nhắn, trạng thái phòng chat và luồng gọi P2P |
 | **Cơ sở dữ liệu** | **MySQL Server** | 8.0 | Lưu trữ người dùng, hội thoại, lịch sử tin nhắn (hỗ trợ Indexing) |
 | **Media Storage** | **Cloudinary API** | REST SDK | Lưu trữ hình ảnh và tệp tin đính kèm đa phương tiện |
-| **Ảo hóa & Đóng gói** | **Docker & Docker Compose**| Multi-stage | Ảo hóa mạng nội bộ (bridge network), khởi chạy toàn bộ bằng 1 lệnh |
+| **Ảo hóa & Đóng gói** | **Docker & Docker Compose** | Multi-stage | Ảo hóa mạng nội bộ (bridge network), khởi chạy toàn bộ bằng 1 lệnh |
 
 ---
 
@@ -115,10 +115,10 @@ Dự án được containerize hóa hoàn chỉnh 100%. Giảng viên và ngư�
 ```
                     [Host Machine / Trình duyệt người dùng]
                              │                 │
-                      Port 3000 (UI)     Port 8080 (API & WS)
+                       Port 3000 (UI)     Port 8080 (API & WS)
                              │                 │
     ┌────────────────────────▼─────────────────▼────────────────────────┐
-    │  Docker Network: nekotalk-network (Driver: bridge)               │
+    │  Docker Network: nekotalk-network (Driver: bridge)                │
     │                                                                   │
     │  ┌─────────────────────────┐         ┌─────────────────────────┐  │
     │  │     nekotalk-client     │         │     nekotalk-server     │  │
@@ -180,7 +180,6 @@ Dành cho các thành viên trong nhóm muốn lập trình, sửa code và debu
 - MySQL Server 8.0
 
 ### Bước 1: Khởi động Database (MySQL)
-Bạn có thể tận dụng Docker để bật riêng MySQL mà không cần cài đặt phức tạp:
 ```bash
 docker compose up mysql -d
 ```
@@ -211,6 +210,8 @@ Client sẽ chạy tại: [http://localhost:3000](http://localhost:3000)
 
 ## 🔗 DANH SÁCH GIAO THỨC & ENDPOINTS MẠNG
 
+> 📖 Xem tài liệu kỹ thuật đầy đủ tại [NETWORK_REPORT.md](./NETWORK_REPORT.md)
+
 ### 1. HTTP / REST API Endpoints
 
 | Nhóm chức năng | Phương thức | Endpoint | Mô tả | Xác thực JWT |
@@ -224,6 +225,7 @@ Client sẽ chạy tại: [http://localhost:3000](http://localhost:3000)
 | **Người dùng** | `POST` | `/api/users/avatar` | Upload ảnh đại diện cá nhân lên Cloudinary | ✅ |
 | **Hội thoại** | `POST` | `/api/conversations` | Tạo cuộc trò chuyện mới (1-1 hoặc nhóm) | ✅ |
 | **Hội thoại** | `GET` | `/api/conversations/my-conversation` | Lấy danh sách các cuộc trò chuyện của tôi | ✅ |
+| **Hội thoại** | `PATCH` | `/api/conversations/{id}/read` | Đánh dấu đã đọc tin nhắn trong hội thoại | ✅ |
 | **Tin nhắn** | `POST` | `/api/chat-messages` | Gửi tin nhắn mới kèm danh sách file media | ✅ |
 | **Tin nhắn** | `GET` | `/api/chat-messages/conversations/{id}/messages` | Lấy lịch sử tin nhắn theo hội thoại (phân trang) | ✅ |
 
@@ -234,11 +236,11 @@ Client sẽ chạy tại: [http://localhost:3000](http://localhost:3000)
 | **Handshake** | WebSocket URL | `ws://localhost:8080/ws` | Điểm bắt tay WebSocket, chặn bắt kiểm tra Token |
 | **Gửi tin nhắn** | Application Prefix | `/app/chat.send` | Client gửi tin nhắn, Server lưu DB và broadcast |
 | **Báo đang gõ** | Application Prefix | `/app/chat.typing` | Client gửi trạng thái đang gõ phím (typing event) |
-| **Bắt tay cuộc gọi** | Application Prefix | `/app/call.request`, `/app/call.accept`, `/app/call.reject` | Khởi tạo, chấp nhận hoặc từ chối cuộc gọi WebRTC |
-| **Trao đổi SDP & ICE**| Application Prefix | `/app/call.sdp`, `/app/call.ice` | Chuyển tiếp cấu hình media và ứng viên mạng P2P |
-| **Game cờ Caro** | Application Prefix | `/app/game.invite`, `/app/game.move` | Gửi lời mời và đồng bộ các nước đi cờ qua Socket |
+| **Tín hiệu gọi** | Application Prefix | `/app/call.signal` | Toàn bộ tín hiệu cuộc gọi WebRTC (INVITE/SDP/ICE) |
+| **Game cờ Caro** | Application Prefix | `/app/game.ttt` | Gửi lời mời và đồng bộ các nước đi cờ qua Socket |
 | **Nhận tin realtime** | User Queue | `/user/queue/messages` | Hàng đợi nhận tin nhắn cá nhân thời gian thực |
-| **Nhận tín hiệu gọi** | User Queue | `/user/queue/call.*` | Hàng đợi nhận tín hiệu chuông reo, SDP, ICE của cuộc gọi |
+| **Nhận tín hiệu gọi** | User Queue | `/user/queue/calls` | Hàng đợi nhận tín hiệu chuông reo, SDP, ICE |
+| **Nhận game cờ** | User Queue | `/user/queue/game.ttt` | Hàng đợi nhận trạng thái ván cờ Caro |
 | **Trạng thái Online** | Topic Broadcast | `/topic/presence` | Kênh lắng nghe trạng thái Online/Offline toàn mạng |
 
 ---
@@ -258,9 +260,9 @@ Bên cạnh các yêu cầu cơ bản của đề tài Lập trình mạng, nhó
 ```
 BTL_LTM_NekoTalk/
 ├── README.md                          # Tài liệu chính của đồ án (file này)
+├── NETWORK_REPORT.md                  # Báo cáo chi tiết giao thức mạng
 ├── INSTRUCTION.md                     # File quy định của Giảng viên (KHÔNG sửa đổi)
 ├── PLAN.md                            # Kế hoạch phát triển nội bộ của nhóm
-├── PROJECT_DETAILS.md                 # Báo cáo kiến trúc chi tiết & câu hỏi vấn đáp
 ├── Báo cáo tiến độ 11-11-2026.docx    # File Word báo cáo tiến độ (Nhóm 2 SV)
 ├── docker-compose.yml                 # File điều phối khởi chạy 3 container Docker
 ├── statics/                           # Thư mục tài nguyên tĩnh
@@ -312,8 +314,25 @@ BTL_LTM_NekoTalk/
 - [x] **Presence Tracking:** Tự động phát hiện và broadcast trạng thái Online/Offline của người dùng.
 - [x] **Minigame Socket:** Chơi cờ Caro (TicTacToe) đồng bộ thời gian thực giữa 2 người dùng trong phòng chat.
 - [x] **Đàm thoại Voice & Video Call:** Xây dựng Signaling Server và tích hợp WebRTC P2P qua Google STUN.
-- [x] **Dataset & Tài liệu:** Cung cấp dataset mẫu `dataset_sample.csv`, tài liệu câu hỏi vấn đáp và báo cáo tiến độ Word.
-- [ ] **Kiểm thử mở rộng:** Thử nghiệm kết nối P2P trên các hạ tầng mạng đối xứng phức tạp (TURN Server) và hoàn thiện báo cáo bản in 30 trang.
+- [x] **Dataset & Tài liệu:** Cung cấp dataset mẫu `dataset_sample.csv`, báo cáo giao thức mạng chi tiết và báo cáo tiến độ Word.
+- [ ] **Kiểm thử mở rộng:** Thử nghiệm kết nối P2P trên các hạ tầng mạng đối xứng phức tạp (TURN Server) và hoàn thiện báo cáo bản in.
+
+---
+
+## 🧩 HƯỚNG PHÁT TRIỂN THÊM
+
+- [ ] Hỗ trợ TURN Server cho NAT đối xứng phức tạp (Symmetric NAT)
+- [ ] Gọi nhóm (Group Call) qua WebRTC Mesh / SFU
+- [ ] Tìm kiếm toàn văn tin nhắn (Full-text Search)
+- [ ] Triển khai trên cloud (AWS / GCP) với HTTPS/WSS
+
+---
+
+## 📝 GHI CHÚ
+
+- Repo tuân thủ đúng cấu trúc đã hướng dẫn trong `INSTRUCTION.md`.
+- Tài liệu giao thức mạng chi tiết xem tại [NETWORK_REPORT.md](./NETWORK_REPORT.md).
+- Đảm bảo test kỹ trước khi submit.
 
 ---
 
@@ -324,4 +343,5 @@ BTL_LTM_NekoTalk/
 3. WebRTC 1.0 – Real-Time Communication Between Browsers (W3C): https://www.w3.org/TR/webrtc/
 4. Spring Framework WebSocket & STOMP Messaging: https://docs.spring.io/spring-framework/reference/web/websocket/stomp.html
 5. Next.js App Router Documentation: https://nextjs.org/docs
-6. Project Loom & Virtual Threads in Java 21: https://openjdk.org/projects/loom/
+6. Cloudinary Upload API: https://cloudinary.com/documentation/image_upload_api_reference
+7. Project Loom & Virtual Threads in Java 21: https://openjdk.org/projects/loom/
