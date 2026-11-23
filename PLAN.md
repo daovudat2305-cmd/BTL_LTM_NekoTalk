@@ -8,13 +8,12 @@
 
 ---
 
-## 👥 1. BẢNG PHÂN CHIA NHIỆM VỤ ĐỀ XUẤT
+## 👥 1. BẢNG PHÂN CHIA NHIỆM VỤ THÀNH VIÊN (NHÓM 2 THÀNH VIÊN)
 
-| Thành viên | Phụ trách chính | Nhiệm vụ cụ thể | Trạng thái |
-|---|---|---|:---:|
-| **Partner 1 (Backend)** | Spring Boot, WebSocket Broker, Security | Xây dựng REST API, STOMP Endpoints, Signaling Controller, Entity & Migration | 🟡 Đang hoàn thiện Phase 2 & 3 |
-| **Partner 2 (Frontend)** | Next.js, React UI, Zustand State | Xây dựng UI Chat, Typing Indicator, WebRTC Hooks, Call Screens & Controls | 🟡 Đang hoàn thiện Phase 2 & 3 |
-| **Partner 3 (DevOps/Fullstack)** | Docker, Database, WebRTC Integration | Docker Compose, tối ưu MySQL, tích hợp STUN/WebRTC, tài liệu & Slide báo cáo | 🟢 Đã hoàn thành Phase 1 & Docker |
+| STT | Thành viên | MSSV | Mảng phụ trách chính | Nhiệm vụ cụ thể theo mã nguồn | Trạng thái |
+|:---:|------------|:----:|----------------------|--------------------------------|:---:|
+| **1** | **Đào Vũ Đạt** | B23DCCN127 | **Fullstack Core Architecture, Socket Server & DevOps** | • **Hạ tầng & DevOps:** Khởi tạo kiến trúc dự án, Docker Compose đa tầng (client, server, MySQL), cấu hình mạng bridge LAN và múi giờ.<br>• **Backend Core & Security:** Thiết kế CSDL MySQL 8.0, Spring Data JPA, đánh chỉ mục tối ưu truy vấn chat, xác thực phân tán JWT Stateless.<br>• **Socket Server (Client-Server):** Xây dựng STOMP Message Broker (`/topic`, `/queue`), Chat realtime, Typing indicator, Read receipts, User Presence (Online/Offline/Last active).<br>• **Game Socket:** Thiết kế In-memory TicTacToe/Gomoku 15x15 Session Manager và tích hợp bàn cờ cờ ca-rô realtime.<br>• **Frontend Core:** Khởi tạo kiến trúc Next.js 16, layout chat workspace, Zustand state, Axios client, quản lý nhóm chat và upload avatar. | 🟢 Đã hoàn thành 100% |
+| **2** | **Bùi Hồng Phong** | B23DCCN641 | **WebRTC P2P Media Stream, Signaling & Session Security** | • **Truyền thông P2P:** Tích hợp WebRTC (`RTCPeerConnection`), Google STUN (NAT Traversal), xử lý luồng MediaStream âm thanh/hình ảnh.<br>• **Signaling Server:** Xây dựng bộ điều khiển và xử lý tín hiệu bắt tay SDP Offer/Answer, ICE Candidate qua STOMP (`CallSignalingController`, `CallService`).<br>• **Đàm thoại nhóm đa điểm:** Xây dựng phân hệ Group Call ở cả backend (`GroupCallService`) và frontend (`GroupCallProvider`).<br>• **Giao diện cuộc gọi:** Xây dựng UI đàm thoại Voice Call, Video Call, hộp thoại chuông reo cuộc gọi đến và thanh điều khiển thiết bị Mic/Cam.<br>• **Bảo mật phiên & Tinh gọn Client:** Hiện thực cơ chế thu hồi Refresh Token khi đăng xuất (Revoked Token lưu CSDL), trang hồ sơ cá nhân và dọn dẹp các thành phần UI thừa. | 🟢 Đã hoàn thành 100% |
 
 ---
 
@@ -33,19 +32,21 @@
 
 ### Tính Năng Đã Hoàn Thành ✅
 - [x] **Cấu trúc thư mục:** Chuẩn hóa thư mục gốc theo `INSTRUCTION.md` (`source/client`, `source/server`, `statics/`).
-- [x] **Docker Containerization:** Dockerfile multi-stage cho cả client/server, `docker-compose.yml` với healthcheck MySQL.
+- [x] **Docker Containerization:** Dockerfile multi-stage cho cả client/server, `docker-compose.yml` với healthcheck MySQL, mạng LAN và múi giờ.
 - [x] **Xác thực & Bảo mật:** Đăng ký, đăng nhập cấp JWT Access/Refresh Token, bảo vệ REST API và WebSocket Handshake.
-- [x] **Quản lý hội thoại:** Tạo cuộc trò chuyện 1-1, tìm kiếm người dùng qua username.
+- [x] **Bảo mật phiên đăng xuất:** Cơ chế thu hồi Refresh Token (Revoked Token) lưu CSDL tránh rò rỉ phiên.
+- [x] **Quản lý hội thoại & Nhóm:** Tạo cuộc trò chuyện 1-1, tạo nhóm chat kèm upload avatar nhóm, tìm kiếm người dùng qua username.
 - [x] **Nhắn tin văn bản Realtime:** Gửi/nhận tin nhắn qua REST API + STOMP broadcast `/queue/messages`.
 - [x] **Đính kèm đa phương tiện:** Hỗ trợ lưu trữ thông tin ảnh/file đính kèm qua `MessageMedia`.
-- [x] **Phân trang lịch sử tin nhắn:** Hỗ trợ pagination khi tải lại tin nhắn cũ trong hội thoại.
-
-### Tính Năng Đang Triển Khai & Cần Bổ Sung 🎯
-- [x] **Typing Indicator (Đang nhập văn bản...):** Gửi event realtime khi đối phương đang gõ phím.
-- [x] **Read Receipts (Đã nhận / Đã xem):** Cập nhật trạng thái tin nhắn đã đọc.
-- [ ] **Quản lý hồ sơ người dùng:** Cập nhật thông tin cá nhân và avatar.min
-- [ ] **Gọi thoại & Video Call (WebRTC):** Thiết lập kết nối P2P qua Signaling Server trên nền WebSocket có sẵn.
-- [ ] **Dữ liệu mẫu (`dataset_sample.csv`):** Cung cấp sample dataset phục vụ chấm thi.
+- [x] **Phân trang & Sắp xếp tin nhắn:** Pagination tải tin nhắn cũ, sắp xếp hội thoại theo tin nhắn mới nhất, date dividers, timestamp.
+- [x] **Typing Indicator (Đang nhập văn bản...):** Gửi event realtime khi đối phương đang gõ phím kèm debounce.
+- [x] **Read Receipts (Đã nhận / Đã xem):** Cập nhật trạng thái tin nhắn đã đọc realtime.
+- [x] **Trạng thái trực tuyến (User Presence):** Theo dõi realtime trạng thái Online/Offline và thời gian hoạt động cuối (Last active).
+- [x] **Hồ sơ người dùng & Avatar:** Trang cá nhân, cập nhật thông tin và upload avatar đại diện.
+- [x] **Đàm thoại P2P 1-1 & Nhóm (WebRTC):** Gọi thoại (Voice Call), gọi hình ảnh (Video Call) và phòng gọi nhóm (Group Call) qua kết nối P2P và Signaling Server STOMP.
+- [x] **Mini-game Gomoku/Caro 15x15 Realtime:** Socket session quản lý nước đi, kiểm tra thắng thua và tích hợp modal bàn cờ ngay trong khung chat.
+- [x] **Dữ liệu mẫu (`statics/dataset_sample.csv`):** Cung cấp sample dataset phục vụ chấm thi.
+- [x] **Tài liệu kỹ thuật:** Báo cáo giao thức mạng (`NETWORK_REPORT.md`), kế hoạch triển khai (`PLAN.md`) và hướng dẫn chi tiết (`README.md`).
 
 ---
 
@@ -57,15 +58,15 @@
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │
 ┌───────────────────────────────────▼────────────────────────────────────┐
-│ Phase 2: Hoàn thiện tính năng Chat nâng cao (Typing, Read Receipts)     │
+│ Phase 2: Hoàn thiện tính năng Chat nâng cao (ĐÃ XONG 100% ✅)           │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │
 ┌───────────────────────────────────▼────────────────────────────────────┐
-│ Phase 3: Tính năng Gọi Thoại & Video Call (WebRTC P2P + Signaling)     │
+│ Phase 3: Tính năng Gọi Thoại & Video Call (ĐÃ XONG 100% ✅)            │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │
 ┌───────────────────────────────────▼────────────────────────────────────┐
-│ Phase 4: Kiểm thử, Dữ liệu mẫu & Chuẩn bị Báo cáo Vấn đáp              │
+│ Phase 4: Kiểm thử, Dữ liệu mẫu & Báo cáo Vấn đáp (ĐÃ XONG 100% ✅)     │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -80,7 +81,7 @@
 
 ---
 
-### 🟡 PHASE 2 — HOÀN THIỆN TÍNH NĂNG CHAT NÂNG CAO
+### 🟢 PHASE 2 — HOÀN THIỆN TÍNH NĂNG CHAT NÂNG CAO (ĐÃ HOÀN THÀNH ✅)
 
 #### 2.1 Backend — Typing Indicator
 *Mục tiêu:* Cho phép client gửi sự kiện "đang gõ..." để server chuyển tiếp đến người cùng phòng chat.
@@ -116,7 +117,7 @@
 
 ---
 
-### 🔵 PHASE 3 — TÍNH NĂNG GỌI THOẠI & VIDEO CALL (WEBRTC P2P)
+### 🟢 PHASE 3 — TÍNH NĂNG GỌI THOẠI & VIDEO CALL (WEBRTC P2P) (ĐÃ HOÀN THÀNH ✅)
 
 > [!NOTE]
 > **Kiến trúc WebRTC trong dự án:**
@@ -224,7 +225,7 @@ Các file cần tạo mới:
 
 ---
 
-### 🟣 PHASE 4 — TÀI LIỆU, DATASET & CHUẨN BỊ BÁO CÁO VẤN ĐÁP
+### 🟢 PHASE 4 — TÀI LIỆU, DATASET & CHUẨN BỊ BÁO CÁO VẤN ĐÁP (ĐÃ HOÀN THÀNH ✅)
 
 #### 4.1 Cung cấp Dataset mẫu (`statics/dataset_sample.csv`)
 Tạo file dữ liệu mẫu gồm 10 người dùng mẫu, 5 hội thoại mẫu và danh sách tin nhắn để giảng viên có thể kiểm tra cấu trúc dữ liệu ngay trong thư mục `statics/`.
@@ -257,20 +258,23 @@ Xem chi tiết bộ câu hỏi và đáp án chuẩn lý thuyết mạng tại f
 
 - [x] **Setup & Cấu trúc**
   - [x] Tạo cấu trúc `source/client` và `source/server`
-  - [x] Cấu hình Docker Compose đa tầng
+  - [x] Cấu hình Docker Compose đa tầng & LAN network
   - [x] Viết hướng dẫn `README.md`
-- [ ] **Tính năng Chat hoàn thiện**
-  - [x] Typing Indicator (Backend STOMP endpoint)
-  - [x] Typing Indicator (Frontend UI)
-  - [ ] Read Receipts (Backend DB + Socket)
-  - [ ] Read Receipts (Frontend tick UI)
-- [ ] **WebRTC Voice & Video Call**
-  - [ ] Backend Signaling Controller (`/app/call.*`)
-  - [ ] Frontend WebRTC Service (`RTCPeerConnection` + STUN)
-  - [ ] Frontend Zustand `useCallStore`
-  - [ ] UI Cuộc gọi đến (Incoming Modal)
-  - [ ] UI Màn hình gọi Video & Âm thanh
-- [ ] **Hoàn thiện đồ án**
+- [x] **Tính năng Chat hoàn thiện**
+  - [x] Typing Indicator (Backend STOMP endpoint + Frontend UI debounce)
+  - [x] Read Receipts (Backend DB + Socket + Frontend status tick)
+  - [x] Trạng thái trực tuyến Presence (Online/Offline realtime)
+  - [x] Quản lý nhóm chat & Upload avatar
+- [x] **WebRTC Voice & Video Call**
+  - [x] Backend Signaling Controller (`/app/call.*`, `CallService`)
+  - [x] Phân hệ đàm thoại nhóm đa điểm (`GroupCallService` & `GroupCallProvider`)
+  - [x] Frontend WebRTC Service (`RTCPeerConnection` + Google STUN)
+  - [x] UI Cuộc gọi đến (Incoming Modal) & Voice/Video Call Screens
+- [x] **Tính năng Mở rộng (Bonus)**
+  - [x] Mini-game Caro / Gomoku 15x15 Socket Session realtime
+  - [x] Cơ chế thu hồi Refresh Token (Revoke token logout)
+  - [x] Trang xem thông tin cá nhân (Profile page)
+- [x] **Hoàn thiện đồ án**
   - [x] Tạo dataset mẫu `statics/dataset_sample.csv`
-  - [x] Soạn tài liệu kiến trúc & kiến thức Lập trình mạng [PROJECT_DETAILS.md](./PROJECT_DETAILS.md)
-  - [ ] Test lại toàn bộ luồng chạy trên Docker sạch (`docker compose down -v && docker compose up --build`)
+  - [x] Soạn tài liệu kiến trúc & kiến thức Lập trình mạng [PROJECT_DETAILS.md](./PROJECT_DETAILS.md) và [NETWORK_REPORT.md](./NETWORK_REPORT.md)
+  - [x] Kiểm thử toàn diện trên môi trường Docker sạch (`docker compose down -v && docker compose up --build`)
